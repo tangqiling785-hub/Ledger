@@ -22,7 +22,7 @@
     .topbar {
       position: absolute;
       top: 0; left: 0; width: 100%;
-      padding: 20px;
+      padding: 15px 20px; /* 稍微缩小上下边距 */
       display: flex; justify-content: space-between; align-items: center;
       pointer-events: none;
       z-index: 100;
@@ -35,12 +35,19 @@
       border-radius: 8px;
       color: #007AFF;
       font-size: 14px; font-weight: 600;
-      padding: 6px 12px; outline: none;
+      padding: 0 12px; 
+      height: 32px; /* 固定高度 */
+      line-height: 30px; /* 垂直居中 */
+      outline: none;
       cursor: pointer;
       backdrop-filter: blur(10px);
       pointer-events: auto;
       -webkit-appearance: none;
       box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      white-space: nowrap; /* 防止文字换行 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .top-btn:active { opacity: 0.7; }
 
@@ -48,7 +55,7 @@
     main {
       max-width: 600px;
       margin: 0 auto;
-      padding: 70px 16px 20px; 
+      padding: 65px 16px 20px; 
     }
     
     .page { display: none; }
@@ -181,7 +188,7 @@
 </head>
 <body>
   <header class="topbar">
-    <button class="top-btn" onclick="exportData()" data-i18n="backupBtn">备份</button>
+    <button class="top-btn" onclick="exportData()" data-i18n="backupBtn">备</button>
     <select id="langSelect" class="lang-select">
       <option value="zh-CN">简</option>
       <option value="zh-TW">繁</option>
@@ -350,7 +357,7 @@
         tabRecord: '记账', tabAssets: '资产', tabTransfer: '转账',
         manageAccounts: '自定义账户管理', accountNamePlaceholder: '账户名称', none: '无', savings: '存款', fixed: '定期',
         addAccount: '添加账户', adjustBalance: '设置账户初始余额', saveBalance: '保存初始余额',
-        backupBtn: '备份', importBtn: '找不到数据了？点此恢复', confirmImport: '确认导入并覆盖',
+        backupBtn: '备', importBtn: '找不到数据了？点此恢复', confirmImport: '确认导入并覆盖',
         categories: ['餐饮', '交通', '购物', '工资', '利息', '饮料', '其他']
       },
       'zh-TW': {
@@ -361,7 +368,7 @@
         tabRecord: '記賬', tabAssets: '資產', tabTransfer: '轉賬',
         manageAccounts: '自訂賬戶管理', accountNamePlaceholder: '賬戶名稱', none: '無', savings: '存款', fixed: '定期',
         addAccount: '新增賬戶', adjustBalance: '設定賬戶初始餘額', saveBalance: '儲存初始餘額',
-        backupBtn: '備份', importBtn: '找不到數據了？點此恢復', confirmImport: '確認導入並覆蓋',
+        backupBtn: '備', importBtn: '找不到數據了？點此恢復', confirmImport: '確認導入並覆蓋',
         categories: ['餐飲', '交通', '購物', '工資', '利息', '飲料', '其他']
       },
       'en': {
@@ -372,7 +379,7 @@
         tabRecord: 'Record', tabAssets: 'Assets', tabTransfer: 'Transfer',
         manageAccounts: 'Manage Accounts', accountNamePlaceholder: 'Account Name', none: 'None', savings: 'Savings', fixed: 'Fixed',
         addAccount: 'Add Account', adjustBalance: 'Set Initial Balance', saveBalance: 'Save Balance',
-        backupBtn: 'Backup', importBtn: 'Lost data? Restore here', confirmImport: 'Confirm Import',
+        backupBtn: 'Save', importBtn: 'Lost data? Restore here', confirmImport: 'Confirm Import',
         categories: ['Dining', 'Transport', 'Shopping', 'Salary', 'Interest', 'Drinks', 'Others']
       }
     };
