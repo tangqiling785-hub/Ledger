@@ -10,41 +10,32 @@
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-      background: #EEF4FF; /* 默认记账页的浅蓝背景 */
+      background: #EEF4FF; /* 默认浅蓝背景 */
       color: #1C1C1E;
       font-size: 16px;
       line-height: 1.4;
       padding-bottom: 90px; 
-      transition: background-color 0.4s ease; /* 背景色平滑过渡 */
+      transition: background-color 0.4s ease;
     }
     
-    /* 顶部区域（取消白底，取消标题，只留语言框在右上角） */
+    /* 顶部区域 */
     .topbar {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+      top: 0; left: 0; width: 100%;
       padding: 20px;
-      display: flex;
-      justify-content: flex-end;
+      display: flex; justify-content: flex-end;
       pointer-events: none;
       z-index: 100;
     }
-    .lang-wrapper {
-      pointer-events: auto;
-    }
+    .lang-wrapper { pointer-events: auto; }
     .lang-select {
       background: rgba(255, 255, 255, 0.7);
       border: 1px solid rgba(0,0,0,0.05);
       border-radius: 8px;
       color: #007AFF;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 6px 10px;
-      outline: none;
-      -webkit-appearance: none;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      font-size: 14px; font-weight: 600;
+      padding: 6px 10px; outline: none;
+      -webkit-appearance: none; cursor: pointer;
       backdrop-filter: blur(10px);
     }
 
@@ -55,7 +46,6 @@
       padding: 70px 16px 20px; 
     }
     
-    /* 页面切换控制 */
     .page { display: none; }
     .page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -66,14 +56,9 @@
       border-radius: 20px;
       padding: 24px 20px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.04); /* 稍微加深一点阴影，在白底和彩底上更立体 */
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04); 
     }
-    .card h2 {
-      margin: 0 0 20px;
-      font-size: 18px;
-      font-weight: 700;
-      color: #1C1C1E;
-    }
+    .card h2 { margin: 0 0 20px; font-size: 18px; font-weight: 700; color: #1C1C1E; }
 
     /* 表单元素 */
     form { display: grid; gap: 16px; width: 88%; margin: 0 auto; }
@@ -87,37 +72,28 @@
       color: #1C1C1E; outline: none; transition: box-shadow 0.2s;
       -webkit-appearance: none; text-align: left; width: 100%; 
     }
-    input[type="date"] {
-      display: flex; align-items: center; justify-content: flex-start;
-      text-align: left !important; -webkit-appearance: none;
-    }
+    input[type="date"] { display: flex; align-items: center; justify-content: flex-start; text-align: left !important; -webkit-appearance: none; }
     input[type="date"]::-webkit-date-and-time-value { text-align: left !important; width: 100%; }
     input[type="date"]::-webkit-datetime-edit { text-align: left !important; width: 100%; }
     input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; right: 16px; height: 100%; width: 30px; opacity: 0; }
 
-    input:focus, select:focus {
-      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); background: #FFFFFF;
-    }
+    input:focus, select:focus { box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); background: #FFFFFF; }
     
     .row { display: flex; gap: 10px; width: 100%; }
     .row input { flex: 1; }
-    .row select { width: 90px; text-align: center; flex-shrink: 0; } 
+    .row select { width: 100px; text-align: center; flex-shrink: 0; } 
     
-    /* iOS 风格大按钮 */
+    /* 按钮 */
     button.primary {
       background: #007AFF; color: #FFFFFF; border: none; border-radius: 14px;
       padding: 16px; font-size: 17px; font-weight: 600; cursor: pointer;
       margin-top: 10px; transition: opacity 0.2s; text-align: center; width: 100%;
     }
     button.primary:active { opacity: 0.8; }
-    
-    button.secondary {
-      background: #FFFFFF; color: #007AFF; border: 1px solid #007AFF;
-      border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 600;
-      cursor: pointer; width: 88%; margin: 16px auto 0;
-      display: block; text-align: center;
+    button.danger {
+      background: #FF3B30; color: #FFFFFF; border: none; border-radius: 10px;
+      padding: 8px 12px; font-size: 14px; font-weight: 600; cursor: pointer;
     }
-    button.secondary:active { background: #F2F2F7; }
 
     /* 资产概览区 */
     .split-container { display: flex; gap: 12px; width: 88%; margin: 0 auto; margin-bottom: 20px;}
@@ -130,73 +106,55 @@
     .asset-val { font-size: 24px; font-weight: 800; color: #1C1C1E; letter-spacing: -0.5px; }
     .expense-val { font-size: 20px; font-weight: 700; color: #FF3B30; } 
 
-    /* 账户明细列表 */
-    .account-list {
-      list-style: none; padding: 0; margin: 16px 0 0 0;
-      display: grid; gap: 1px; border-radius: 12px;
-      overflow: hidden; width: 88%; margin-left: auto; margin-right: auto;
-    }
-    .account-list li {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 16px; color: #333;
-    }
+    /* 账户/记录列表 */
+    .account-list { list-style: none; padding: 0; margin: 16px 0 0 0; display: grid; gap: 1px; border-radius: 12px; overflow: hidden; width: 88%; margin-left: auto; margin-right: auto;}
+    .account-list li { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; color: #333; }
     .account-list li:nth-child(odd) { background-color: #F8F9FA; }
     .account-list li:nth-child(even) { background-color: #FFFFFF; border: 1px solid #F2F2F7; border-left: none; border-right: none; }
-    
     .account-list .acc-title { font-weight: 600; font-size: 15px; }
-    .account-list .acc-bal { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+    .account-list .acc-bal { font-weight: 700; font-size: 16px; }
     .account-list .acc-bal.negative { color: #FF3B30; }
 
-    /* 账单/转账记录列表 */
     .list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; width: 88%; margin: 0 auto;}
-    .list li {
-      display: flex; justify-content: space-between; align-items: center;
-      padding-bottom: 12px; border-bottom: 1px solid #F2F2F7;
-    }
+    .list li { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #F2F2F7; }
     .list li:last-child { border-bottom: none; padding-bottom: 0; }
     .list .item-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
     .list .meta { color: #8E8E93; font-size: 13px; }
-    .list .money { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right;}
+    .list .money { font-size: 17px; font-weight: 700; text-align: right;}
     .list .money.expense { color: #1C1C1E; } 
     .list .money.income { color: #34C759; } 
     .list .money.transfer { color: #007AFF; font-size: 16px;}
 
     .empty { color: #8E8E93; font-size: 14px; text-align: center; margin: 20px 0 0; }
 
-    /* 余额编辑器样式 */
-    .balance-editor { margin-top: 16px; display: grid; gap: 8px; width: 88%; margin-left: auto; margin-right: auto;}
-    .balance-editor .editor-row { display: flex; align-items: center; gap: 8px; }
-    .balance-editor .editor-row span { flex: 1; font-size: 14px; }
-    .balance-editor input { width: 120px; padding: 10px; text-align: right; }
-
-    /* ===== 底部导航栏 (Tab Bar) ===== */
+    /* 底部导航栏 (Tab Bar) */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; width: 100%;
       display: flex; gap: 8px;
-      background: rgba(255, 255, 255, 0.4); /* 半透明毛玻璃 */
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      background: rgba(255, 255, 255, 0.4); 
+      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
       border-top: 1px solid rgba(255, 255, 255, 0.5);
       padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); 
       z-index: 20;
     }
-    
     .nav-item {
       flex: 1; display: flex; align-items: center; justify-content: center;
       padding: 14px 0; font-size: 15px; font-weight: 600;
-      border-radius: 14px; cursor: pointer; transition: all 0.3s;
-      color: #666;
+      border-radius: 14px; cursor: pointer; transition: all 0.3s; color: #666;
     }
-
-    /* 背景色稍微加一点透明度，让底部更透亮 */
     .nav-record { background-color: rgba(0, 122, 255, 0.1); } 
     .nav-assets { background-color: rgba(52, 199, 89, 0.1); } 
     .nav-transfer { background-color: rgba(255, 149, 0, 0.1); } 
 
-    /* 选中状态完全实色 */
     .nav-record.active { background-color: #007AFF; color: #FFFFFF; }
     .nav-assets.active { background-color: #34C759; color: #FFFFFF; }
     .nav-transfer.active { background-color: #FF9500; color: #FFFFFF; }
+
+    /* 账户管理界面样式 */
+    .manage-section { display: grid; gap: 10px; margin-top: 15px; width: 88%; margin-left: auto; margin-right: auto;}
+    .manage-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #F8F9FA; border-radius: 12px; }
+    .manage-info { font-size: 15px; font-weight: 600; }
+    .manage-sub { font-size: 12px; color: #8E8E93; margin-top: 2px;}
   </style>
 </head>
 <body>
@@ -251,8 +209,9 @@
       </section>
     </section>
 
-    <!-- ===== 页面 2：资产概览 ===== -->
+    <!-- ===== 页面 2：资产概览 & 账户管理 ===== -->
     <section id="page-assets" class="page">
+      <!-- 资产概览卡片 -->
       <section class="card">
         <h2 data-i18n="overview">资产概览</h2>
         <div class="split-container">
@@ -271,10 +230,32 @@
             <div class="expense-val" id="monthSummaryRMB">0.00</div>
           </div>
         </div>
-        
         <ul id="accountList" class="account-list"></ul>
-        <button id="editBalanceBtn" class="secondary" data-i18n="setInitBalance">设置初始余额</button>
-        <div id="balanceEditor" class="balance-editor" style="display:none;"></div>
+      </section>
+
+      <!-- 账户管理卡片 -->
+      <section class="card">
+        <h2 data-i18n="manageAccounts">自定义账户管理</h2>
+        
+        <!-- 添加表单 -->
+        <form id="addAccountForm" style="margin-bottom: 20px;">
+          <div class="row">
+            <input type="text" id="newAccountName" required data-i18n-placeholder="accountNamePlaceholder" placeholder="账户名称 (如: 汇丰)">
+            <select id="newAccountSubType">
+              <option value="" data-i18n="none">无</option>
+              <option value="存款" data-i18n="savings">存款</option>
+              <option value="定期" data-i18n="fixed">定期</option>
+            </select>
+            <select id="newAccountCurrency" style="width: 90px;">
+              <option value="HKD">HKD</option>
+              <option value="RMB">RMB</option>
+            </select>
+          </div>
+          <button type="submit" class="primary" data-i18n="addAccount">添加账户</button>
+        </form>
+
+        <!-- 已有账户列表 -->
+        <div id="manageAccountList" class="manage-section"></div>
       </section>
     </section>
 
@@ -292,7 +273,7 @@
           <label><span data-i18n="amount">金额</span>
             <div class="row">
               <input type="number" id="transferAmount" step="0.01" required placeholder="0.00">
-              <select id="transferCurrency"><option value="HKD">HKD</option></select>
+              <select id="transferCurrency"><option value="HKD">HKD</option><option value="RMB">RMB</option></select>
             </div>
           </label>
           <label><span data-i18n="date">日期</span>
@@ -315,13 +296,13 @@
 
   <!-- ===== 底部导航栏 ===== -->
   <nav class="bottom-nav">
-    <div class="nav-item nav-record active" onclick="switchTab('page-record', this)">
+    <div class="nav-item nav-record active" onclick="switchTab('page-record', this, '#EEF4FF')">
       <span data-i18n="tabRecord">记账</span>
     </div>
-    <div class="nav-item nav-assets" onclick="switchTab('page-assets', this)">
+    <div class="nav-item nav-assets" onclick="switchTab('page-assets', this, '#EEF8F0')">
       <span data-i18n="tabAssets">资产</span>
     </div>
-    <div class="nav-item nav-transfer" onclick="switchTab('page-transfer', this)">
+    <div class="nav-item nav-transfer" onclick="switchTab('page-transfer', this, '#FFF5E9')">
       <span data-i18n="tabTransfer">转账</span>
     </div>
   </nav>
@@ -330,116 +311,93 @@
     // ===== 多语言字典 =====
     const LANGS = {
       'zh-CN': {
-        overview: '资产概览', hkdAccount: 'HKD 账户', rmbAccount: 'RMB 账户',
-        totalAssets: '总资产', monthExpense: '本月支出', 
-        setInitBalance: '设置初始余额', saveInitBalance: '保存初始余额',
+        overview: '资产概览', hkdAccount: 'HKD 账户', rmbAccount: 'RMB 账户', totalAssets: '总资产', monthExpense: '本月支出',
         record: '记账', transfer: '转账 / 还款', amount: '金额', type: '类型', account: '账户', category: '分类', date: '日期', note: '备注',
         expense: '支出', income: '收入', saveRecord: '保存账单', confirmTransfer: '确认转账', from: '从', to: '到',
         billList: '账单列表', transferList: '转账记录', noRecords: '还没有记录，先记一笔吧。', noTransfers: '还没有转账记录。', notePlaceholder: '可选',
         tabRecord: '记账', tabAssets: '资产', tabTransfer: '转账',
-        categories: ['餐饮', '交通', '购物', '工资', '利息', '饮料', '其他'],
-        accNames: {
-          'hsbc-savings': '汇丰银行卡 · 存款', 'hsbc-fixed': '汇丰银行卡 · 定期',
-          'hsb-savings': '恒生银行卡 · 存款', 'hsb-fixed': '恒生银行卡 · 定期',
-          'octopus': '八达通', 'alipay-hk': 'Alipay 香港版', 'credit-card': '信用卡', 'cash-hkd': '港币现金',
-          'alipay': '支付宝', 'wechat': '微信支付', 'ccb': '建设银行卡', 'icbc': '工商银行卡', 'cash-rmb': '人民币现金'
-        }
+        manageAccounts: '自定义账户管理', accountNamePlaceholder: '账户名称 (如: 汇丰)', none: '无', savings: '存款', fixed: '定期',
+        addAccount: '添加账户',
+        categories: ['餐饮', '交通', '购物', '工资', '利息', '饮料', '其他']
       },
       'zh-TW': {
-        overview: '資產概覽', hkdAccount: 'HKD 賬戶', rmbAccount: 'RMB 賬戶',
-        totalAssets: '總資產', monthExpense: '本月支出', 
-        setInitBalance: '設定初始餘額', saveInitBalance: '儲存初始餘額',
+        overview: '資產概覽', hkdAccount: 'HKD 賬戶', rmbAccount: 'RMB 賬戶', totalAssets: '總資產', monthExpense: '本月支出',
         record: '記賬', transfer: '轉賬 / 還款', amount: '金額', type: '類型', account: '賬戶', category: '分類', date: '日期', note: '備註',
         expense: '支出', income: '收入', saveRecord: '儲存賬單', confirmTransfer: '確認轉賬', from: '從', to: '到',
         billList: '賬單列表', transferList: '轉賬記錄', noRecords: '還沒有記錄，先記一筆吧。', noTransfers: '還沒有轉賬記錄。', notePlaceholder: '可選',
         tabRecord: '記賬', tabAssets: '資產', tabTransfer: '轉賬',
-        categories: ['餐飲', '交通', '購物', '工資', '利息', '飲料', '其他'],
-        accNames: {
-          'hsbc-savings': '匯豐銀行卡 · 存款', 'hsbc-fixed': '匯豐銀行卡 · 定期',
-          'hsb-savings': '恒生銀行卡 · 存款', 'hsb-fixed': '恒生銀行卡 · 定期',
-          'octopus': '八達通', 'alipay-hk': 'Alipay 香港版', 'credit-card': '信用卡', 'cash-hkd': '港幣現金',
-          'alipay': '支付寶', 'wechat': '微信支付', 'ccb': '建設銀行卡', 'icbc': '工商銀行卡', 'cash-rmb': '人民幣現金'
-        }
+        manageAccounts: '自訂賬戶管理', accountNamePlaceholder: '賬戶名稱 (如: 匯豐)', none: '無', savings: '存款', fixed: '定期',
+        addAccount: '新增賬戶',
+        categories: ['餐飲', '交通', '購物', '工資', '利息', '飲料', '其他']
       },
       'en': {
-        overview: 'Overview', hkdAccount: 'HKD Accounts', rmbAccount: 'RMB Accounts',
-        totalAssets: 'Total Assets', monthExpense: 'Monthly Expense', 
-        setInitBalance: 'Set Initial Balance', saveInitBalance: 'Save Initial Balance',
+        overview: 'Overview', hkdAccount: 'HKD Accounts', rmbAccount: 'RMB Accounts', totalAssets: 'Total Assets', monthExpense: 'Monthly Expense',
         record: 'Record', transfer: 'Transfer / Repay', amount: 'Amount', type: 'Type', account: 'Account', category: 'Category', date: 'Date', note: 'Note',
         expense: 'Expense', income: 'Income', saveRecord: 'Save Record', confirmTransfer: 'Confirm Transfer', from: 'From', to: 'To',
         billList: 'Records', transferList: 'Transfers', noRecords: 'No records yet.', noTransfers: 'No transfers yet.', notePlaceholder: 'Optional',
         tabRecord: 'Record', tabAssets: 'Assets', tabTransfer: 'Transfer',
-        categories: ['Dining', 'Transport', 'Shopping', 'Salary', 'Interest', 'Drinks', 'Others'],
-        accNames: {
-          'hsbc-savings': 'HSBC · Savings', 'hsbc-fixed': 'HSBC · Fixed',
-          'hsb-savings': 'Hang Seng · Savings', 'hsb-fixed': 'Hang Seng · Fixed',
-          'octopus': 'Octopus', 'alipay-hk': 'Alipay HK', 'credit-card': 'Credit Card', 'cash-hkd': 'HKD Cash',
-          'alipay': 'Alipay', 'wechat': 'WeChat Pay', 'ccb': 'CCB Card', 'icbc': 'ICBC Card', 'cash-rmb': 'RMB Cash'
-        }
+        manageAccounts: 'Manage Accounts', accountNamePlaceholder: 'Account Name', none: 'None', savings: 'Savings', fixed: 'Fixed',
+        addAccount: 'Add Account',
+        categories: ['Dining', 'Transport', 'Shopping', 'Salary', 'Interest', 'Drinks', 'Others']
       }
     };
 
     let currentLang = localStorage.getItem('lang') || 'zh-CN';
 
-    // 基础账户配置
-    const ACCOUNTS = [
-      { id: 'hsbc-savings',  currency: 'HKD' },
-      { id: 'hsbc-fixed',    currency: 'HKD' },
-      { id: 'hsb-savings',   currency: 'HKD' },
-      { id: 'hsb-fixed',     currency: 'HKD' },
-      { id: 'octopus',       currency: 'HKD' },
-      { id: 'alipay-hk',     currency: 'HKD' },
-      { id: 'credit-card',   currency: 'HKD' },
-      { id: 'cash-hkd',      currency: 'HKD' },
-      { id: 'alipay',        currency: 'RMB' },
-      { id: 'wechat',        currency: 'RMB' },
-      { id: 'ccb',           currency: 'RMB' },
-      { id: 'icbc',          currency: 'RMB' },
-      { id: 'cash-rmb',      currency: 'RMB' }
-    ];
+    // 数据读写
+    function loadData(key, defaultVal) { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : defaultVal; }
+    function saveData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-    const TRANSFER_RULES = [{ from: 'hsbc-savings', to: 'credit-card' }];
-
-    function loadRecords() { const raw = localStorage.getItem('records'); return raw ? JSON.parse(raw) : []; }
-    function saveRecords(records) { localStorage.setItem('records', JSON.stringify(records)); }
-    function loadTransfers() { const raw = localStorage.getItem('transfers'); return raw ? JSON.parse(raw) : []; }
-    function saveTransfers(transfers) { localStorage.setItem('transfers', JSON.stringify(transfers)); }
-    function loadInitialBalances() { const raw = localStorage.getItem('initialBalances'); return raw ? JSON.parse(raw) : {}; }
-    function saveInitialBalances(balances) { localStorage.setItem('initialBalances', JSON.stringify(balances)); }
-    
-    function todayStr() {
-      const d = new Date();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${d.getFullYear()}-${m}-${day}`;
-    }
-    function isThisMonth(dateStr) {
-      const now = new Date();
-      const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      return dateStr.startsWith(prefix);
-    }
-
-    function calcBalance(accountId, records, initialBalances) {
-      const initial = initialBalances[accountId] || 0;
-      const recordDelta = records.filter((r) => r.accountId === accountId).reduce((sum, r) => sum + (r.type === 'income' ? r.amount : -r.amount), 0);
-      const transfers = loadTransfers();
-      const transferDelta = transfers.reduce((sum, t) => {
-        if (t.from === accountId) return sum - t.amount;
-        if (t.to === accountId) return sum + t.amount;
-        return sum;
-      }, 0);
-      return initial + recordDelta + transferDelta;
-    }
+    let ACCOUNTS = loadData('accounts', []);
 
     // ===== 渲染函数 =====
+    function renderManageAccounts() {
+      const listEl = document.getElementById('manageAccountList');
+      listEl.innerHTML = '';
+      if (ACCOUNTS.length === 0) {
+        listEl.innerHTML = '<div class="empty" style="margin:10px;">还没有账户，请在上方添加</div>';
+        return;
+      }
+      ACCOUNTS.forEach(acc => {
+        const div = document.createElement('div');
+        div.className = 'manage-row';
+        
+        const info = document.createElement('div');
+        const subType = acc.subType ? ` · ${LANGS[currentLang][acc.subType === '存款' ? 'savings' : 'fixed']}` : '';
+        info.innerHTML = `<div class="manage-info">${acc.name}${subType}</div><div class="manage-sub">${acc.currency}</div>`;
+        
+        const delBtn = document.createElement('button');
+        delBtn.className = 'danger';
+        delBtn.textContent = '✕';
+        delBtn.onclick = () => deleteAccount(acc.id);
+        
+        div.appendChild(info);
+        div.appendChild(delBtn);
+        listEl.appendChild(div);
+      });
+    }
+
     function renderAccountOptions() {
-      const select = document.getElementById('account');
-      select.innerHTML = '';
-      ACCOUNTS.forEach((acc) => {
+      const accountSelect = document.getElementById('account');
+      const fromSelect = document.getElementById('fromAccount');
+      const toSelect = document.getElementById('toAccount');
+      
+      accountSelect.innerHTML = ''; fromSelect.innerHTML = ''; toSelect.innerHTML = '';
+      
+      if (ACCOUNTS.length === 0) {
         const opt = document.createElement('option');
-        opt.value = acc.id;
-        opt.textContent = `${LANGS[currentLang].accNames[acc.id]}（${acc.currency}）`;
-        select.appendChild(opt);
+        opt.textContent = '请先在【资产】页底部添加账户';
+        accountSelect.appendChild(opt); fromSelect.appendChild(opt); toSelect.appendChild(opt);
+        return;
+      }
+
+      ACCOUNTS.forEach((acc) => {
+        const subType = acc.subType ? ` · ${acc.subType}` : '';
+        const text = `${acc.name}${subType}（${acc.currency}）`;
+        
+        const opt1 = document.createElement('option'); opt1.value = acc.id; opt1.textContent = text; accountSelect.appendChild(opt1);
+        const opt2 = document.createElement('option'); opt2.value = acc.id; opt2.textContent = text; fromSelect.appendChild(opt2);
+        const opt3 = document.createElement('option'); opt3.value = acc.id; opt3.textContent = text; toSelect.appendChild(opt3);
       });
     }
 
@@ -448,93 +406,80 @@
       select.innerHTML = '';
       LANGS[currentLang].categories.forEach(cat => {
         const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
+        opt.value = cat; opt.textContent = cat;
         select.appendChild(opt);
       });
     }
 
-    function renderTransferOptions() {
-      const fromSelect = document.getElementById('fromAccount');
-      const toSelect = document.getElementById('toAccount');
-      fromSelect.innerHTML = ''; toSelect.innerHTML = '';
-      TRANSFER_RULES.forEach((rule) => {
-        const fromAcc = ACCOUNTS.find((a) => a.id === rule.from);
-        const toAcc = ACCOUNTS.find((a) => a.id === rule.to);
-        if (fromAcc) { const opt = document.createElement('option'); opt.value = rule.from; opt.textContent = `${LANGS[currentLang].accNames[fromAcc.id]}（${fromAcc.currency}）`; fromSelect.appendChild(opt); }
-        if (toAcc) { const opt = document.createElement('option'); opt.value = rule.to; opt.textContent = `${LANGS[currentLang].accNames[toAcc.id]}（${toAcc.currency}）`; toSelect.appendChild(opt); }
-      });
+    function calcBalance(accountId) {
+      const records = loadData('records', []);
+      const transfers = loadData('transfers', []);
+      const initial = loadData('initialBalances', {})[accountId] || 0;
+      
+      const recordDelta = records.filter((r) => r.accountId === accountId).reduce((sum, r) => sum + (r.type === 'income' ? r.amount : -r.amount), 0);
+      const transferDelta = transfers.reduce((sum, t) => {
+        if (t.from === accountId) return sum - t.amount;
+        if (t.to === accountId) return sum + t.amount;
+        return sum;
+      }, 0);
+      return initial + recordDelta + transferDelta;
     }
 
     function renderAccounts() {
-      const records = loadRecords(); const initialBalances = loadInitialBalances();
       const listEl = document.getElementById('accountList'); 
       listEl.innerHTML = '';
-      
       ACCOUNTS.forEach((acc) => {
-        const balance = calcBalance(acc.id, records, initialBalances);
+        const balance = calcBalance(acc.id);
         const li = document.createElement('li');
-        
-        const title = document.createElement('div'); 
-        title.className = 'acc-title';
-        title.textContent = LANGS[currentLang].accNames[acc.id]; 
-        
-        const balDiv = document.createElement('div'); 
-        balDiv.className = 'acc-bal' + (balance < 0 ? ' negative' : '');
-        balDiv.textContent = `${acc.currency} ${balance.toFixed(2)}`; 
-        
-        li.appendChild(title); 
-        li.appendChild(balDiv); 
+        const subType = acc.subType ? ` · ${acc.subType}` : '';
+        li.innerHTML = `<div class="acc-title">${acc.name}${subType}</div><div class="acc-bal ${balance<0?'negative':''}">${acc.currency} ${balance.toFixed(2)}</div>`;
         listEl.appendChild(li);
       });
     }
 
     function renderList() {
-      const records = loadRecords();
+      const records = loadData('records', []);
       const listEl = document.getElementById('list'); const emptyTip = document.getElementById('emptyTip');
       listEl.innerHTML = '';
       const sorted = [...records].sort((a, b) => a.date === b.date ? b.createdAt - a.createdAt : (a.date < b.date ? 1 : -1));
       sorted.forEach((r) => {
-        const acc = ACCOUNTS.find((a) => a.id === r.accountId);
         const li = document.createElement('li');
-        const left = document.createElement('div');
-        const title = document.createElement('div'); title.className = 'item-title'; title.textContent = `${r.category}${r.note ? ' · ' + r.note : ''}`;
-        const metaName = acc ? LANGS[currentLang].accNames[acc.id] : '未知账户';
-        const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `${r.date} · ${metaName}`;
-        left.appendChild(title); left.appendChild(meta);
-        const money = document.createElement('div'); money.className = 'money ' + r.type;
-        money.textContent = (r.type === 'expense' ? '-' : '+') + `${r.currency} ${r.amount.toFixed(2)}`;
-        li.appendChild(left); li.appendChild(money); listEl.appendChild(li);
+        const metaName = r.accountName || '未知账户';
+        li.innerHTML = `
+          <div>
+            <div class="item-title">${r.category}${r.note ? ' · ' + r.note : ''}</div>
+            <div class="meta">${r.date} · ${metaName}</div>
+          </div>
+          <div class="money ${r.type}">${(r.type === 'expense' ? '-' : '+') + r.currency + ' ' + r.amount.toFixed(2)}</div>
+        `;
+        listEl.appendChild(li);
       });
       emptyTip.style.display = records.length ? 'none' : 'block';
     }
 
     function renderTransfers() {
-      const transfers = loadTransfers();
+      const transfers = loadData('transfers', []);
       const listEl = document.getElementById('transferList'); const emptyTip = document.getElementById('transferEmptyTip');
       listEl.innerHTML = '';
       const sorted = [...transfers].sort((a, b) => b.createdAt - a.createdAt);
       sorted.forEach((t) => {
-        const fromAcc = ACCOUNTS.find((a) => a.id === t.from); const toAcc = ACCOUNTS.find((a) => a.id === t.to);
         const li = document.createElement('li');
-        const left = document.createElement('div');
-        const fromName = fromAcc ? LANGS[currentLang].accNames[fromAcc.id] : t.from;
-        const toName = toAcc ? LANGS[currentLang].accNames[toAcc.id] : t.to;
-        const title = document.createElement('div'); title.className = 'item-title'; title.textContent = `${fromName} → ${toName}`;
-        const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `${t.date}${t.note ? ' · ' + t.note : ''}`;
-        left.appendChild(title); left.appendChild(meta);
-        const money = document.createElement('div'); money.className = 'money transfer'; money.textContent = `${t.currency} ${t.amount.toFixed(2)}`;
-        li.appendChild(left); li.appendChild(money); listEl.appendChild(li);
+        li.innerHTML = `
+          <div>
+            <div class="item-title">${t.fromName} → ${t.toName}</div>
+            <div class="meta">${t.date}${t.note ? ' · ' + t.note : ''}</div>
+          </div>
+          <div class="money transfer">${t.currency} ${t.amount.toFixed(2)}</div>
+        `;
+        listEl.appendChild(li);
       });
       emptyTip.style.display = transfers.length ? 'none' : 'block';
     }
 
     function renderTotalAssets() {
-      const records = loadRecords();
-      const initialBalances = loadInitialBalances();
       let totalHKD = 0; let totalRMB = 0;
       ACCOUNTS.forEach((acc) => {
-        const balance = calcBalance(acc.id, records, initialBalances);
+        const balance = calcBalance(acc.id);
         if (acc.currency === 'HKD') totalHKD += balance;
         if (acc.currency === 'RMB') totalRMB += balance;
       });
@@ -543,37 +488,47 @@
     }
 
     function renderSummary() {
-      const records = loadRecords();
+      const records = loadData('records', []);
       const monthExpense = (currency) => records.filter((r) => r.type === 'expense' && r.currency === currency && isThisMonth(r.date)).reduce((sum, r) => sum + r.amount, 0);
       document.getElementById('monthSummaryHKD').textContent = monthExpense('HKD').toFixed(2);
       document.getElementById('monthSummaryRMB').textContent = monthExpense('RMB').toFixed(2);
     }
 
-    function render() { 
+    function renderAll() { 
       renderAccounts(); 
       renderList(); 
       renderSummary(); 
       renderTransfers(); 
       renderTotalAssets();
+      renderManageAccounts();
     }
 
-    function renderBalanceEditor() {
-      const editor = document.getElementById('balanceEditor'); const initialBalances = loadInitialBalances();
-      editor.innerHTML = '';
-      ACCOUNTS.forEach((acc) => {
-        const row = document.createElement('div'); row.className = 'editor-row';
-        const label = document.createElement('span'); label.textContent = LANGS[currentLang].accNames[acc.id];
-        const input = document.createElement('input'); input.type = 'number'; input.step = '0.01'; input.value = initialBalances[acc.id] || 0; input.dataset.accountId = acc.id;
-        row.appendChild(label); row.appendChild(input); editor.appendChild(row);
-      });
-      const saveBtn = document.createElement('button'); saveBtn.className = 'primary'; saveBtn.textContent = LANGS[currentLang].saveInitBalance; saveBtn.style.marginTop = '10px';
-      saveBtn.addEventListener('click', () => {
-        const balances = {};
-        editor.querySelectorAll('input[data-account-id]').forEach((input) => { balances[input.dataset.accountId] = parseFloat(input.value) || 0; });
-        saveInitialBalances(balances); editor.style.display = 'none'; render();
-      });
-      editor.appendChild(saveBtn);
+    // 工具
+    function todayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function isThisMonth(dateStr) { const now = new Date(); return dateStr.startsWith(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`); }
+
+    // ===== 账户操作 =====
+    function deleteAccount(id) {
+      if (!confirm('删除账户后，相关历史账单仍保留，但无法再对其进行记账。确定删除？')) return;
+      ACCOUNTS = ACCOUNTS.filter(a => a.id !== id);
+      saveData('accounts', ACCOUNTS);
+      renderAll();
+      renderAccountOptions();
     }
+
+    document.getElementById('addAccountForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newAccountName').value.trim();
+      const subType = document.getElementById('newAccountSubType').value;
+      const currency = document.getElementById('newAccountCurrency').value;
+      
+      ACCOUNTS.push({ id: Date.now().toString(), name, subType, currency });
+      saveData('accounts', ACCOUNTS);
+      this.reset();
+      
+      renderAll();
+      renderAccountOptions();
+    });
 
     // ===== 多语言切换核心逻辑 =====
     function applyLanguage(lang) {
@@ -583,88 +538,86 @@
 
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (LANGS[lang][key]) {
-          el.textContent = LANGS[lang][key];
-        }
+        if (LANGS[lang][key]) el.textContent = LANGS[lang][key];
       });
-
       document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
-        if (LANGS[lang][key]) {
-          el.placeholder = LANGS[lang][key];
-        }
+        if (LANGS[lang][key]) el.placeholder = LANGS[lang][key];
       });
 
       renderCategoryOptions();
       renderAccountOptions();
-      renderTransferOptions();
-      render();
+      renderAll();
     }
 
-    // ===== 底部导航栏切换逻辑 =====
-    function switchTab(pageId, btnEl) {
-      document.querySelectorAll('.page').forEach(page => { page.classList.remove('active'); });
+    // ===== 底部导航栏 =====
+    function switchTab(pageId, btnEl, bgColor) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
       
-      document.querySelectorAll('.nav-item').forEach(item => { item.classList.remove('active'); });
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
       btnEl.classList.add('active');
 
-      // 动态切换 body 背景色
-      if (pageId === 'page-record') {
-        document.body.style.backgroundColor = '#EEF4FF'; // 浅蓝
-      } else if (pageId === 'page-assets') {
-        document.body.style.backgroundColor = '#EEF8F0'; // 浅绿
-      } else if (pageId === 'page-transfer') {
-        document.body.style.backgroundColor = '#FFF5E9'; // 浅橙
-      }
-
+      document.body.style.backgroundColor = bgColor;
       window.scrollTo(0, 0);
     }
 
     // ===== 事件监听 =====
-    document.getElementById('langSelect').addEventListener('change', function(e) {
-      applyLanguage(e.target.value);
-    });
-
-    document.getElementById('editBalanceBtn').addEventListener('click', function () {
-      const editor = document.getElementById('balanceEditor');
-      if (editor.style.display === 'none') { renderBalanceEditor(); editor.style.display = 'grid'; } else { editor.style.display = 'none'; }
-    });
+    document.getElementById('langSelect').addEventListener('change', function(e) { applyLanguage(e.target.value); });
 
     document.getElementById('recordForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      if (ACCOUNTS.length === 0) { alert('请先在【资产】页底部添加账户'); return; }
       const amount = parseFloat(document.getElementById('amount').value);
-      if (!amount || amount <= 0) { alert('请输入有效金额 / Please enter a valid amount'); return; }
+      if (!amount || amount <= 0) return;
+      
       const accountId = document.getElementById('account').value;
       const account = ACCOUNTS.find((a) => a.id === accountId);
-      const record = {
-        id: Date.now(), amount: amount, currency: document.getElementById('currency').value, type: document.getElementById('type').value,
-        accountId: accountId, accountName: LANGS[currentLang].accNames[accountId], category: document.getElementById('category').value,
-        date: document.getElementById('date').value, note: document.getElementById('note').value.trim(), synced: false, createdAt: Date.now()
-      };
-      const records = loadRecords(); records.push(record); saveRecords(records);
-      this.reset(); document.getElementById('date').value = todayStr(); render();
+      if (!account) return;
+
+      const records = loadData('records', []);
+      records.push({
+        id: Date.now(), amount, currency: document.getElementById('currency').value, 
+        type: document.getElementById('type').value, accountId, accountName: account.name, 
+        category: document.getElementById('category').value, date: document.getElementById('date').value, 
+        note: document.getElementById('note').value.trim(), createdAt: Date.now()
+      });
+      saveData('records', records);
+      this.reset(); document.getElementById('date').value = todayStr(); renderAll();
     });
 
     document.getElementById('transferForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      if (ACCOUNTS.length < 2) { alert('至少需要两个账户才能转账'); return; }
       const amount = parseFloat(document.getElementById('transferAmount').value);
-      if (!amount || amount <= 0) { alert('请输入有效金额 / Please enter a valid amount'); return; }
-      const from = document.getElementById('fromAccount').value; const to = document.getElementById('toAccount').value;
-      const fromAcc = ACCOUNTS.find((a) => a.id === from); const toAcc = ACCOUNTS.find((a) => a.id === to);
-      if (fromAcc && toAcc && fromAcc.currency !== toAcc.currency) { alert('不支持跨币种转账 / Cross-currency transfer not supported'); return; }
-      const transfer = {
-        id: Date.now(), from: from, to: to, amount: amount, currency: document.getElementById('transferCurrency').value,
-        date: document.getElementById('transferDate').value, note: document.getElementById('transferNote').value.trim(), createdAt: Date.now(), synced: false
-      };
-      const transfers = loadTransfers(); transfers.push(transfer); saveTransfers(transfers);
-      this.reset(); document.getElementById('transferDate').value = todayStr(); render();
+      if (!amount || amount <= 0) return;
+      
+      const from = document.getElementById('fromAccount').value; 
+      const to = document.getElementById('toAccount').value;
+      const fromAcc = ACCOUNTS.find((a) => a.id === from); 
+      const toAcc = ACCOUNTS.find((a) => a.id === to);
+      
+      if (!fromAcc || !toAcc) return;
+      if (from === to) { alert('不能转给同一个账户'); return; }
+      if (fromAcc.currency !== toAcc.currency) { alert('不支持跨币种转账'); return; }
+
+      const transfers = loadData('transfers', []);
+      transfers.push({
+        id: Date.now(), from, to, fromName: fromAcc.name, toName: toAcc.name, amount, currency: fromAcc.currency,
+        date: document.getElementById('transferDate').value, note: document.getElementById('transferNote').value.trim(), createdAt: Date.now()
+      });
+      saveData('transfers', transfers);
+      this.reset(); document.getElementById('transferDate').value = todayStr(); renderAll();
     });
 
-    // ===== 初始化 =====
+    // ===== 启动 =====
     document.getElementById('date').value = todayStr();
     document.getElementById('transferDate').value = todayStr();
     applyLanguage(currentLang);
+    
+    if(ACCOUNTS.length === 0) {
+      setTimeout(() => alert('欢迎！请先点击底部的【资产】页，在下方添加属于你的账户。'), 500);
+    }
   </script>
 </body>
 </html>
