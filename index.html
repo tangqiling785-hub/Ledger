@@ -16,12 +16,11 @@
       line-height: 1.4;
     }
     
-    /* 顶部导航 */
+    /* 顶部导航 - 改用 Grid 布局实现绝对居中 */
     .topbar {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr; /* 左占1份，中自适应，右占1份 */
       align-items: center;
-      justify-content: center; /* 标题绝对居中 */
-      position: relative;      /* 为右侧语言选择器做定位参照 */
       padding: 16px 20px;
       background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(10px);
@@ -31,12 +30,18 @@
       top: 0;
       z-index: 10;
     }
-    .topbar h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .topbar h1 {
+      grid-column: 2; /* 放在中间 */
+      margin: 0; 
+      font-size: 20px; 
+      font-weight: 700; 
+      letter-spacing: -0.5px; 
+    }
     
-    /* 语言选择器（固定在右侧） */
+    /* 语言选择器（靠右） */
     .lang-select {
-      position: absolute;
-      right: 20px;
+      grid-column: 3;
+      justify-self: end;
       background: transparent;
       border: none;
       color: #007AFF;
@@ -92,19 +97,32 @@
       outline: none;
       transition: box-shadow 0.2s;
       -webkit-appearance: none;
-      text-align: left; /* 强制所有文本靠左 */
+      text-align: left;
     }
     
-    /* 修复 iOS 上日期框默认居中的问题 */
+    /* ===== 修复 iOS 日期框默认居中的终极魔法 ===== */
     input[type="date"] {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      text-align: left;
+      text-align: left !important;
       -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
     }
+    /* 专治 Safari 的 Webkit 伪类 */
+    input[type="date"]::-webkit-date-and-time-value {
+      text-align: left !important;
+    }
+    input[type="date"]::-webkit-datetime-edit {
+      text-align: left !important;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      position: absolute;
+      right: 16px;
+      height: 100%;
+      width: 30px;
+      opacity: 0; /* 隐藏原生的图标，但保留点击区域 */
+    }
+    /* ========================================= */
 
     input:focus, select:focus {
       box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); 
@@ -112,7 +130,7 @@
     }
     .row { display: flex; gap: 10px; }
     .row input { flex: 1; }
-    .row select { width: 100px; text-align: center; } /* 币种单独居中显示 */
+    .row select { width: 100px; text-align: center; } 
     
     /* iOS 风格大按钮 */
     button.primary {
@@ -173,7 +191,7 @@
     }
     .toggle-btn:active { background: #E5E5EA; }
 
-    /* 账户明细列表（浅色交替） */
+    /* 账户明细列表 */
     .account-list {
       list-style: none;
       padding: 0;
