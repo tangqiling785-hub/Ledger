@@ -18,26 +18,31 @@
       transition: background-color 0.4s ease;
     }
     
-    /* 顶部区域 */
+    /* 顶部区域 (左右对称) */
     .topbar {
       position: absolute;
       top: 0; left: 0; width: 100%;
       padding: 20px;
-      display: flex; justify-content: flex-end;
+      display: flex; justify-content: space-between; align-items: center;
       pointer-events: none;
       z-index: 100;
     }
-    .lang-wrapper { pointer-events: auto; }
-    .lang-select {
+    
+    /* 顶部按钮和下拉框共用样式 */
+    .top-btn, .lang-select {
       background: rgba(255, 255, 255, 0.7);
       border: 1px solid rgba(0,0,0,0.05);
       border-radius: 8px;
       color: #007AFF;
       font-size: 14px; font-weight: 600;
-      padding: 6px 10px; outline: none;
-      -webkit-appearance: none; cursor: pointer;
+      padding: 6px 12px; outline: none;
+      cursor: pointer;
       backdrop-filter: blur(10px);
+      pointer-events: auto;
+      -webkit-appearance: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
     }
+    .top-btn:active { opacity: 0.7; }
 
     /* 主容器 */
     main {
@@ -66,7 +71,7 @@
       display: grid; gap: 6px; font-size: 13px; font-weight: 600;
       color: #8E8E93; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; 
     }
-    input, select {
+    input, select, textarea {
       font: inherit; font-size: 16px; padding: 14px 16px;
       border: none; border-radius: 12px; background: #F2F2F7; 
       color: #1C1C1E; outline: none; transition: box-shadow 0.2s;
@@ -77,7 +82,7 @@
     input[type="date"]::-webkit-datetime-edit { text-align: left !important; width: 100%; }
     input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; right: 16px; height: 100%; width: 30px; opacity: 0; }
 
-    input:focus, select:focus { box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); background: #FFFFFF; }
+    input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); background: #FFFFFF; }
     
     .row { display: flex; gap: 10px; width: 100%; }
     .row input { flex: 1; }
@@ -93,6 +98,11 @@
     button.danger {
       background: #FF3B30; color: #FFFFFF; border: none; border-radius: 10px;
       padding: 8px 12px; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    button.secondary {
+      background: #FFFFFF; color: #007AFF; border: 1px solid #007AFF;
+      border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 600;
+      cursor: pointer; width: 100%; margin-top: 10px; display: block; text-align: center;
     }
 
     /* 资产概览区 */
@@ -155,17 +165,28 @@
     .manage-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #F8F9FA; border-radius: 12px; }
     .manage-info { font-size: 15px; font-weight: 600; }
     .manage-sub { font-size: 12px; color: #8E8E93; margin-top: 2px;}
+
+    /* 初始余额编辑器 */
+    .balance-editor { display: none; margin-top: 15px; width: 88%; margin-left: auto; margin-right: auto; background: #F8F9FA; padding: 16px; border-radius: 12px;}
+    .editor-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .editor-row span { font-size: 14px; font-weight: 600; }
+    .editor-row input { width: 120px; padding: 10px; text-align: right; }
+
+    /* 极简的恢复数据按钮 */
+    .restore-link {
+      display: block; text-align: center; margin: 30px auto 10px;
+      font-size: 13px; color: #8E8E93; text-decoration: underline; cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="lang-wrapper">
-      <select id="langSelect" class="lang-select">
-        <option value="zh-CN">简</option>
-        <option value="zh-TW">繁</option>
-        <option value="en">EN</option>
-      </select>
-    </div>
+    <button class="top-btn" onclick="exportData()" data-i18n="backupBtn">备份</button>
+    <select id="langSelect" class="lang-select">
+      <option value="zh-CN">简</option>
+      <option value="zh-TW">繁</option>
+      <option value="en">EN</option>
+    </select>
   </header>
 
   <main>
@@ -256,7 +277,18 @@
 
         <!-- 已有账户列表 -->
         <div id="manageAccountList" class="manage-section"></div>
+        
+        <!-- 初始余额编辑器 (默认隐藏) -->
+        <button class="secondary" onclick="toggleBalanceEditor()" data-i18n="adjustBalance">设置账户初始余额</button>
+        <div id="balanceEditor" class="balance-editor"></div>
       </section>
+
+      <!-- 隐藏的数据恢复入口 -->
+      <div class="restore-link" onclick="toggleImport()" data-i18n="importBtn">找不到数据了？点此恢复</div>
+      <div id="importArea" style="display:none; width: 88%; margin: 0 auto 20px;">
+        <textarea id="importText" placeholder="请粘贴备份的代码..." style="height: 100px; margin-bottom: 10px;"></textarea>
+        <button class="primary" style="background:#FF3B30;" onclick="doImport()" data-i18n="confirmImport">确认导入并覆盖</button>
+      </div>
     </section>
 
     <!-- ===== 页面 3：转账还款 ===== -->
@@ -316,8 +348,9 @@
         expense: '支出', income: '收入', saveRecord: '保存账单', confirmTransfer: '确认转账', from: '从', to: '到',
         billList: '账单列表', transferList: '转账记录', noRecords: '还没有记录，先记一笔吧。', noTransfers: '还没有转账记录。', notePlaceholder: '可选',
         tabRecord: '记账', tabAssets: '资产', tabTransfer: '转账',
-        manageAccounts: '自定义账户管理', accountNamePlaceholder: '账户名称 (如: 汇丰)', none: '无', savings: '存款', fixed: '定期',
-        addAccount: '添加账户',
+        manageAccounts: '自定义账户管理', accountNamePlaceholder: '账户名称', none: '无', savings: '存款', fixed: '定期',
+        addAccount: '添加账户', adjustBalance: '设置账户初始余额', saveBalance: '保存初始余额',
+        backupBtn: '备份', importBtn: '找不到数据了？点此恢复', confirmImport: '确认导入并覆盖',
         categories: ['餐饮', '交通', '购物', '工资', '利息', '饮料', '其他']
       },
       'zh-TW': {
@@ -326,8 +359,9 @@
         expense: '支出', income: '收入', saveRecord: '儲存賬單', confirmTransfer: '確認轉賬', from: '從', to: '到',
         billList: '賬單列表', transferList: '轉賬記錄', noRecords: '還沒有記錄，先記一筆吧。', noTransfers: '還沒有轉賬記錄。', notePlaceholder: '可選',
         tabRecord: '記賬', tabAssets: '資產', tabTransfer: '轉賬',
-        manageAccounts: '自訂賬戶管理', accountNamePlaceholder: '賬戶名稱 (如: 匯豐)', none: '無', savings: '存款', fixed: '定期',
-        addAccount: '新增賬戶',
+        manageAccounts: '自訂賬戶管理', accountNamePlaceholder: '賬戶名稱', none: '無', savings: '存款', fixed: '定期',
+        addAccount: '新增賬戶', adjustBalance: '設定賬戶初始餘額', saveBalance: '儲存初始餘額',
+        backupBtn: '備份', importBtn: '找不到數據了？點此恢復', confirmImport: '確認導入並覆蓋',
         categories: ['餐飲', '交通', '購物', '工資', '利息', '飲料', '其他']
       },
       'en': {
@@ -337,7 +371,8 @@
         billList: 'Records', transferList: 'Transfers', noRecords: 'No records yet.', noTransfers: 'No transfers yet.', notePlaceholder: 'Optional',
         tabRecord: 'Record', tabAssets: 'Assets', tabTransfer: 'Transfer',
         manageAccounts: 'Manage Accounts', accountNamePlaceholder: 'Account Name', none: 'None', savings: 'Savings', fixed: 'Fixed',
-        addAccount: 'Add Account',
+        addAccount: 'Add Account', adjustBalance: 'Set Initial Balance', saveBalance: 'Save Balance',
+        backupBtn: 'Backup', importBtn: 'Lost data? Restore here', confirmImport: 'Confirm Import',
         categories: ['Dining', 'Transport', 'Shopping', 'Salary', 'Interest', 'Drinks', 'Others']
       }
     };
@@ -507,7 +542,7 @@
     function todayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function isThisMonth(dateStr) { const now = new Date(); return dateStr.startsWith(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`); }
 
-    // ===== 账户操作 =====
+    // ===== 账户操作 & 初始余额 =====
     function deleteAccount(id) {
       if (!confirm('删除账户后，相关历史账单仍保留，但无法再对其进行记账。确定删除？')) return;
       ACCOUNTS = ACCOUNTS.filter(a => a.id !== id);
@@ -529,6 +564,106 @@
       renderAll();
       renderAccountOptions();
     });
+
+    function toggleBalanceEditor() {
+      const editor = document.getElementById('balanceEditor');
+      if (editor.style.display === 'none' || editor.style.display === '') {
+        renderBalanceEditor();
+        editor.style.display = 'block';
+      } else {
+        editor.style.display = 'none';
+      }
+    }
+
+    function renderBalanceEditor() {
+      const editor = document.getElementById('balanceEditor');
+      const balances = loadData('initialBalances', {});
+      editor.innerHTML = '';
+      if (ACCOUNTS.length === 0) {
+        editor.innerHTML = '<p style="font-size:12px; color:#666; text-align:center;">请先添加账户</p>';
+        return;
+      }
+      ACCOUNTS.forEach(acc => {
+        const row = document.createElement('div');
+        row.className = 'editor-row';
+        row.innerHTML = `<span>${acc.name}</span><input type="number" id="bal_${acc.id}" step="0.01" value="${balances[acc.id] || 0}">`;
+        editor.appendChild(row);
+      });
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'primary';
+      saveBtn.style.marginTop = '10px';
+      saveBtn.textContent = LANGS[currentLang].saveBalance || '保存初始余额';
+      saveBtn.onclick = () => {
+        const newBalances = {};
+        ACCOUNTS.forEach(acc => {
+          newBalances[acc.id] = parseFloat(document.getElementById(`bal_${acc.id}`).value) || 0;
+        });
+        saveData('initialBalances', newBalances);
+        editor.style.display = 'none';
+        renderAll();
+        alert('初始余额已保存！');
+      };
+      editor.appendChild(saveBtn);
+    }
+
+    // ===== 数据备份与恢复 =====
+    function exportData() {
+      const data = {
+        accounts: loadData('accounts', []),
+        records: loadData('records', []),
+        transfers: loadData('transfers', []),
+        initialBalances: loadData('initialBalances', {})
+      };
+      const str = JSON.stringify(data);
+      
+      // 尝试复制到剪贴板
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(str).then(() => {
+          alert('✅ 备份已成功复制到剪贴板！\n\n请打开微信“文件传输助手”或备忘录，粘贴并发送保存。');
+        }).catch(() => {
+          fallbackExport(str);
+        });
+      } else {
+        fallbackExport(str);
+      }
+    }
+
+    function fallbackExport(str) {
+      document.getElementById('importArea').style.display = 'block';
+      const textarea = document.getElementById('importText');
+      textarea.value = str;
+      textarea.select();
+      document.execCommand('copy');
+      alert('✅ 备份已生成并自动全选。\n\n由于浏览器限制，请手动长按复制上方文本框的内容并保存。');
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function toggleImport() {
+      const area = document.getElementById('importArea');
+      area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function doImport() {
+      const str = document.getElementById('importText').value.trim();
+      if (!str) { alert('请先粘贴备份数据'); return; }
+      
+      try {
+        const data = JSON.parse(str);
+        if (!data.accounts || !data.records) throw new Error('数据格式不正确');
+        
+        if (confirm('⚠️ 警告：导入将覆盖当前所有数据和账户，且不可逆！确定要恢复吗？')) {
+          saveData('accounts', data.accounts || []);
+          saveData('records', data.records || []);
+          saveData('transfers', data.transfers || []);
+          saveData('initialBalances', data.initialBalances || {});
+          
+          alert('✅ 数据恢复成功！页面即将刷新。');
+          window.location.reload();
+        }
+      } catch (e) {
+        alert('❌ 导入失败：复制的数据不完整或格式有误，请检查。');
+      }
+    }
 
     // ===== 多语言切换核心逻辑 =====
     function applyLanguage(lang) {
@@ -619,24 +754,5 @@
       setTimeout(() => alert('欢迎！请先点击底部的【资产】页，在下方添加属于你的账户。'), 500);
     }
   </script>
-  <script>
-      // 注册 Service Worker 实现离线可用
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW registered!'))
-            .catch(err => console.log('SW registration failed:', err));
-        });
-      }
-    </script><script>
-      // 注册 Service Worker 实现离线可用
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW registered!'))
-            .catch(err => console.log('SW registration failed:', err));
-        });
-      }
-    </script>
 </body>
 </html>
