@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的账本</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f6f8; color: #222; font-size: 16px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: #fff; border-bottom: 1px solid #e5e5e5; position: sticky; top: 0; z-index: 10; }
+    .topbar h1 { margin: 0; font-size: 20px; }
+    .elder-toggle { padding: 8px 12px; border: 1px solid #bbb; background: #fff; border-radius: 8px; cursor: pointer; }
+    main { max-width: 560px; margin: 0 auto; padding: 16px; }
+    .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .card h2 { margin: 0 0 12px; font-size: 17px; }
+    form { display: grid; gap: 10px; }
+    label { display: grid; gap: 4px; font-size: 14px; color: #555; }
+    input, select, button { font: inherit; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
+    .row { display: flex; gap: 8px; }
+    .row input { flex: 1; }
+    .row select { width: 90px; }
+    button.primary { background: #2f6fed; color: #fff; border: none; font-weight: 600; cursor: pointer; }
+    button.secondary { margin-top: 12px; background: #fff; border: 1px solid #bbb; cursor: pointer; }
+    .summary { font-size: 26px; font-weight: 700; margin: 0 0 6px; color: #d4380d; }
+    .summary.asset { color: #1a4b8c; }
+    .account-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .account-list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px; border-radius: 8px; background: #fafafa; border: 1px solid #eee; }
+    .account-list .meta { color: #666; font-size: 13px; }
+    .account-list .balance { font-weight: 600; }
+    .account-list .balance.negative { color: #d4380d; }
+    .balance-editor { margin-top: 12px; display: grid; gap: 8px; }
+    .balance-editor .editor-row { display: flex; align-items: center; gap: 8px; }
+    .balance-editor .editor-row span { flex: 1; font-size: 14px; }
+    .balance-editor input { width: 120px; }
+    .list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px; border-radius: 8px; background: #fafafa; border: 1px solid #eee; }
+    .list .meta { color: #666; font-size: 13px; }
+    .list .money.expense { color: #d4380d; font-weight: 600; }
+    .list .money.income { color: #389e0d; font-weight: 600; }
+    .list .money.transfer { color: #2f6fed; font-weight: 600; }
+    .empty { color: #888; font-size: 14px; margin: 8px 0 0; }
+    body.elder-mode { font-size: 22px; }
+    body.elder-mode .topbar h1 { font-size: 28px; }
+    body.elder-mode .elder-toggle { font-size: 20px; padding: 12px 18px; }
+    body.elder-mode label { font-size: 20px; }
+    body.elder-mode input, body.elder-mode select, body.elder-mode button { font-size: 22px; padding: 16px; }
+    body.elder-mode .summary { font-size: 34px; }
+    body.elder-mode .list .meta, body.elder-mode .account-list .meta { font-size: 18px; }
+    body.elder-mode .card h2 { font-size: 24px; }
+    body.elder-mode .account-list li { padding: 16px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1>我的账本</h1>
+    <button id="elderToggle" class="elder-toggle">老人版</button>
+  </header>
+
+  <main>
+    <!-- 1. 本月支出 -->
+    <section class="card">
+      <h2>本月支出</h2>
+      <p class="summary" id="monthSummaryHKD">HKD 0.00</p>
+      <p class="summary" id="monthSummaryRMB">RMB 0.00</p>
+    </section>
+
+    <!-- 2. 记账 -->
+    <section class="card">
+      <h2>记账</h2>
+      <form id="recordForm">
+        <label>金额
+          <div class="row">
+            <input type="number" id="amount" step="0.01" required placeholder="0.00">
+            <select id="currency"><option value="HKD">HKD</option><option value="RMB">RMB</option></select>
+          </div>
+        </label>
+        <label>类型
+          <select id="type"><option value="expense">支出</option><option value="income">收入</option></select>
+        </label>
+        <label>账户
+          <select id="account"></select>
+        </label>
+        <label>分类
+          <select id="category">
+            <option>餐饮</option><option>交通</option><option>购物</option><option>工资</option>
+            <option>利息</option><option>饮料</option><option>八达通</option><option>其他</option>
+          </select>
+        </label>
+        <label>日期
+          <input type="date" id="date" required>
+        </label>
+        <label>备注
+          <input type="text" id="note" placeholder="可选">
+        </label>
+        <button type="submit" class="primary">保存</button>
+      </form>
+    </section>
+
+    <!-- 3. 账户互转 / 还款 -->
+    <section class="card">
+      <h2>账户互转 / 还款</h2>
+      <form id="transferForm">
+        <label>从（转出账户）
+          <select id="fromAccount"></select>
+        </label>
+        <label>到（转入账户）
+          <select id="toAccount"></select>
+        </label>
+        <label>金额
+          <div class="row">
+            <input type="number" id="transferAmount" step="0.01" required placeholder="0.00">
+            <select id="transferCurrency">
+              <option value="HKD">HKD</option>
+              <option value="RMB">RMB</option>
+            </select>
+          </div>
+        </label>
+        <label>日期
+          <input type="date" id="transferDate" required>
+        </label>
+        <label>备注
+          <input type="text" id="transferNote" placeholder="可选，例如：存定期 / 还信用卡">
+        </label>
+        <button type="submit" class="primary">确认转账</button>
+      </form>
+    </section>
+
+    <!-- 4. 账户余额 -->
+    <section class="card">
+      <h2>账户余额</h2>
+      <ul id="accountList" class="account-list"></ul>
+      <button id="editBalanceBtn" class="secondary">设置初始余额</button>
+      <div id="balanceEditor" class="balance-editor" style="display:none;"></div>
+    </section>
+
+    <!-- 5. 总资产 -->
+    <section class="card">
+      <h2>总资产</h2>
+      <p class="summary asset" id="totalAssetsHKD">HKD 0.00</p>
+      <p class="summary asset" id="totalAssetsRMB">RMB 0.00</p>
+    </section>
+
+    <!-- 6. 账单列表 -->
+    <section class="card">
+      <h2>账单列表</h2>
+      <ul id="list" class="list"></ul>
+      <p id="emptyTip" class="empty">还没有记录，先记一笔吧。</p>
+    </section>
+
+    <!-- 7. 转账记录 -->
+    <section class="card">
+      <h2>转账记录</h2>
+      <ul id="transferList" class="list"></ul>
+      <p id="transferEmptyTip" class="empty">还没有转账记录。</p>
+    </section>
+  </main>
+
+  <script>
+    const ACCOUNTS = [
+      { id: 'hsbc-savings',  name: '汇丰银行卡', subType: '存款',     currency: 'HKD' },
+      { id: 'hsbc-fixed',    name: '汇丰银行卡', subType: '定期存款', currency: 'HKD' },
+      { id: 'hsb-savings',   name: '恒生银行卡', subType: '存款',     currency: 'HKD' },
+      { id: 'hsb-fixed',     name: '恒生银行卡', subType: '定期存款', currency: 'HKD' },
+      { id: 'alipay',        name: '支付宝',     subType: '',         currency: 'RMB' },
+      { id: 'alipay-hk',     name: 'Alipay',     subType: '香港版',   currency: 'HKD' },
+      { id: 'wechat',        name: '微信支付',   subType: '',         currency: 'RMB' },
+      { id: 'ccb',           name: '建设银行卡', subType: '',         currency: 'RMB' },
+      { id: 'icbc',          name: '工商银行卡', subType: '',         currency: 'RMB' },
+      { id: 'credit-card',   name: '信用卡',     subType: '',         currency: 'HKD' },
+      { id: 'cash-hkd',      name: '现金',       subType: '',         currency: 'HKD' },
+      { id: 'cash-rmb',      name: '现金',       subType: '',         currency: 'RMB' }
+    ];
+
+    function loadRecords() { const raw = localStorage.getItem('records'); return raw ? JSON.parse(raw) : []; }
+    function saveRecords(records) { localStorage.setItem('records', JSON.stringify(records)); }
+    function loadTransfers() { const raw = localStorage.getItem('transfers'); return raw ? JSON.parse(raw) : []; }
+    function saveTransfers(transfers) { localStorage.setItem('transfers', JSON.stringify(transfers)); }
+    function loadInitialBalances() { const raw = localStorage.getItem('initialBalances'); return raw ? JSON.parse(raw) : {}; }
+    function saveInitialBalances(balances) { localStorage.setItem('initialBalances', JSON.stringify(balances)); }
+    
+    function todayStr() {
+      const d = new Date();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${d.getFullYear()}-${m}-${day}`;
+    }
+    function isThisMonth(dateStr) {
+      const now = new Date();
+      const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      return dateStr.startsWith(prefix);
+    }
+    function accountLabel(acc) { return acc.subType ? `${acc.name} · ${acc.subType}` : acc.name; }
+
+    function calcBalance(accountId, records, initialBalances) {
+      const initial = initialBalances[accountId] || 0;
+      const recordDelta = records.filter((r) => r.accountId === accountId).reduce((sum, r) => sum + (r.type === 'income' ? r.amount : -r.amount), 0);
+      const transfers = loadTransfers();
+      const transferDelta = transfers.reduce((sum, t) => {
+        if (t.from === accountId) return sum - t.amount;
+        if (t.to === accountId) return sum + t.amount;
+        return sum;
+      }, 0);
+      return initial + recordDelta + transferDelta;
+    }
+
+    // 渲染所有下拉框（记账账户、转出、转入）
+    function renderAllOptions() {
+      const accSelect = document.getElementById('account');
+      const fromSelect = document.getElementById('fromAccount');
+      const toSelect = document.getElementById('toAccount');
+      
+      accSelect.innerHTML = ''; fromSelect.innerHTML = ''; toSelect.innerHTML = '';
+      
+      ACCOUNTS.forEach((acc) => {
+        const label = `${accountLabel(acc)}（${acc.currency}）`;
+        
+        // 1. 记账下拉框
+        const opt1 = document.createElement('option');
+        opt1.value = acc.id; opt1.textContent = label;
+        accSelect.appendChild(opt1);
+        
+        // 2. 转出下拉框
+        const opt2 = document.createElement('option');
+        opt2.value = acc.id; opt2.textContent = label;
+        fromSelect.appendChild(opt2);
+        
+        // 3. 转入下拉框
+        const opt3 = document.createElement('option');
+        opt3.value = acc.id; opt3.textContent = label;
+        toSelect.appendChild(opt3);
+      });
+
+      // 默认选中第二个账户作为转入，避免"从A转到A"
+      if (toSelect.options.length > 1) {
+        toSelect.selectedIndex = 1;
+      }
+    }
+
+    function renderAccounts() {
+      const records = loadRecords(); const initialBalances = loadInitialBalances();
+      const listEl = document.getElementById('accountList'); listEl.innerHTML = '';
+      ACCOUNTS.forEach((acc) => {
+        const balance = calcBalance(acc.id, records, initialBalances);
+        const li = document.createElement('li');
+        const left = document.createElement('div');
+        const title = document.createElement('div'); title.textContent = accountLabel(acc);
+        const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = acc.currency;
+        left.appendChild(title); left.appendChild(meta);
+        const right = document.createElement('div'); right.className = 'balance' + (balance < 0 ? ' negative' : '');
+        right.textContent = `${acc.currency} ${balance.toFixed(2)}`;
+        li.appendChild(left); li.appendChild(right); listEl.appendChild(li);
+      });
+    }
+
+    function renderList() {
+      const records = loadRecords();
+      const listEl = document.getElementById('list'); const emptyTip = document.getElementById('emptyTip');
+      listEl.innerHTML = '';
+      const sorted = [...records].sort((a, b) => a.date === b.date ? b.createdAt - a.createdAt : (a.date < b.date ? 1 : -1));
+      sorted.forEach((r) => {
+        const acc = ACCOUNTS.find((a) => a.id === r.accountId);
+        const li = document.createElement('li');
+        const left = document.createElement('div');
+        const title = document.createElement('div'); title.textContent = `${r.category}${r.note ? ' · ' + r.note : ''}`;
+        const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `${r.date} · ${acc ? accountLabel(acc) : '未知账户'}`;
+        left.appendChild(title); left.appendChild(meta);
+        const money = document.createElement('div'); money.className = 'money ' + r.type;
+        money.textContent = (r.type === 'expense' ? '-' : '+') + `${r.currency} ${r.amount.toFixed(2)}`;
+        li.appendChild(left); li.appendChild(money); listEl.appendChild(li);
+      });
+      emptyTip.style.display = records.length ? 'none' : 'block';
+    }
+
+    function renderTransfers() {
+      const transfers = loadTransfers();
+      const listEl = document.getElementById('transferList'); const emptyTip = document.getElementById('transferEmptyTip');
+      listEl.innerHTML = '';
+      const sorted = [...transfers].sort((a, b) => b.createdAt - a.createdAt);
+      sorted.forEach((t) => {
+        const fromAcc = ACCOUNTS.find((a) => a.id === t.from); const toAcc = ACCOUNTS.find((a) => a.id === t.to);
+        const li = document.createElement('li');
+        const left = document.createElement('div');
+        const title = document.createElement('div'); title.textContent = `${fromAcc ? accountLabel(fromAcc) : t.from} → ${toAcc ? accountLabel(toAcc) : t.to}`;
+        const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `${t.date}${t.note ? ' · ' + t.note : ''}`;
+        left.appendChild(title); left.appendChild(meta);
+        const money = document.createElement('div'); money.className = 'money transfer'; money.textContent = `${t.currency} ${t.amount.toFixed(2)}`;
+        li.appendChild(left); li.appendChild(money); listEl.appendChild(li);
+      });
+      emptyTip.style.display = transfers.length ? 'none' : 'block';
+    }
+
+    function renderTotalAssets() {
+      const records = loadRecords();
+      const initialBalances = loadInitialBalances();
+      let totalHKD = 0;
+      let totalRMB = 0;
+
+      ACCOUNTS.forEach((acc) => {
+        const balance = calcBalance(acc.id, records, initialBalances);
+        if (acc.currency === 'HKD') totalHKD += balance;
+        if (acc.currency === 'RMB') totalRMB += balance;
+      });
+
+      document.getElementById('totalAssetsHKD').textContent = 'HKD ' + totalHKD.toFixed(2);
+      document.getElementById('totalAssetsRMB').textContent = 'RMB ' + totalRMB.toFixed(2);
+    }
+
+    function renderSummary() {
+      const records = loadRecords();
+      const monthExpense = (currency) => records.filter((r) => r.type === 'expense' && r.currency === currency && isThisMonth(r.date)).reduce((sum, r) => sum + r.amount, 0);
+      document.getElementById('monthSummaryHKD').textContent = 'HKD ' + monthExpense('HKD').toFixed(2);
+      document.getElementById('monthSummaryRMB').textContent = 'RMB ' + monthExpense('RMB').toFixed(2);
+    }
+
+    function render() { 
+      renderAccounts(); 
+      renderList(); 
+      renderSummary(); 
+      renderTransfers(); 
+      renderTotalAssets(); 
+    }
+
+    function renderBalanceEditor() {
+      const editor = document.getElementById('balanceEditor'); const initialBalances = loadInitialBalances();
+      editor.innerHTML = '';
+      ACCOUNTS.forEach((acc) => {
+        const row = document.createElement('div'); row.className = 'editor-row';
+        const label = document.createElement('span'); label.textContent = `${accountLabel(acc)}（${acc.currency}）`;
+        const input = document.createElement('input'); input.type = 'number'; input.step = '0.01'; input.value = initialBalances[acc.id] || 0; input.dataset.accountId = acc.id;
+        row.appendChild(label); row.appendChild(input); editor.appendChild(row);
+      });
+      const saveBtn = document.createElement('button'); saveBtn.className = 'primary'; saveBtn.textContent = '保存初始余额';
+      saveBtn.addEventListener('click', () => {
+        const balances = {};
+        editor.querySelectorAll('input[data-account-id]').forEach((input) => { balances[input.dataset.accountId] = parseFloat(input.value) || 0; });
+        saveInitialBalances(balances); editor.style.display = 'none'; render();
+      });
+      editor.appendChild(saveBtn);
+    }
+
+    document.getElementById('editBalanceBtn').addEventListener('click', function () {
+      const editor = document.getElementById('balanceEditor');
+      if (editor.style.display === 'none') { renderBalanceEditor(); editor.style.display = 'grid'; } else { editor.style.display = 'none'; }
+    });
+
+    // ===== 记账提交 =====
+    document.getElementById('recordForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('amount').value);
+      if (!amount || amount <= 0) { alert('请输入有效金额'); return; }
+      const accountId = document.getElementById('account').value;
+      const account = ACCOUNTS.find((a) => a.id === accountId);
+      const record = {
+        id: Date.now(), amount: amount, currency: document.getElementById('currency').value, type: document.getElementById('type').value,
+        accountId: accountId, accountName: account ? accountLabel(account) : '', category: document.getElementById('category').value,
+        date: document.getElementById('date').value, note: document.getElementById('note').value.trim(), synced: false, createdAt: Date.now()
+      };
+      const records = loadRecords(); records.push(record); saveRecords(records);
+      this.reset(); document.getElementById('date').value = todayStr(); render();
+    });
+
+    // ===== 转账提交 =====
+    document.getElementById('transferForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('transferAmount').value);
+      if (!amount || amount <= 0) { alert('请输入有效金额'); return; }
+      
+      const from = document.getElementById('fromAccount').value; 
+      const to = document.getElementById('toAccount').value;
+      
+      if (from === to) { alert('转出账户和转入账户不能是同一个！'); return; }
+
+      const fromAcc = ACCOUNTS.find((a) => a.id === from); 
+      const toAcc = ACCOUNTS.find((a) => a.id === to);
+      const currency = document.getElementById('transferCurrency').value;
+
+      // 校验：账户本身的币种，必须和选择的金额币种一致
+      if (fromAcc.currency !== currency || toAcc.currency !== currency) {
+        alert('错误：转出/转入账户的币种与填写的金额币种不一致！');
+        return;
+      }
+
+      const transfer = {
+        id: Date.now(), from: from, to: to, amount: amount, currency: currency,
+        date: document.getElementById('transferDate').value, note: document.getElementById('transferNote').value.trim(), createdAt: Date.now(), synced: false
+      };
+      
+      const transfers = loadTransfers(); 
+      transfers.push(transfer); 
+      saveTransfers(transfers);
+      
+      this.reset(); 
+      document.getElementById('transferDate').value = todayStr(); 
+      render();
+    });
+
+    const elderToggle = document.getElementById('elderToggle');
+    function applyElderMode(on) {
+      document.body.classList.toggle('elder-mode', on);
+      elderToggle.textContent = on ? '普通版' : '老人版';
+      localStorage.setItem('elderMode', on ? '1' : '0');
+    }
+    elderToggle.addEventListener('click', function () { applyElderMode(!document.body.classList.contains('elder-mode')); });
+
+    document.getElementById('date').value = todayStr();
+    document.getElementById('transferDate').value = todayStr();
+    applyElderMode(localStorage.getItem('elderMode') === '1');
+    
+    // 初始化渲染
+    renderAllOptions(); 
+    render();
+  </script>
+</body>
+</html>
