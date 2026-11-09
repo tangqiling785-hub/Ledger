@@ -16,10 +16,10 @@
       line-height: 1.4;
     }
     
-    /* 顶部导航 - 改用 Grid 布局实现绝对居中 */
+    /* 顶部导航 */
     .topbar {
       display: grid;
-      grid-template-columns: 1fr auto 1fr; /* 左占1份，中自适应，右占1份 */
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
       padding: 16px 20px;
       background: rgba(255, 255, 255, 0.9);
@@ -30,15 +30,9 @@
       top: 0;
       z-index: 10;
     }
-    .topbar h1 {
-      grid-column: 2; /* 放在中间 */
-      margin: 0; 
-      font-size: 20px; 
-      font-weight: 700; 
-      letter-spacing: -0.5px; 
-    }
+    .topbar h1 { grid-column: 2; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
     
-    /* 语言选择器（靠右） */
+    /* 语言选择器 */
     .lang-select {
       grid-column: 3;
       justify-self: end;
@@ -85,7 +79,9 @@
       color: #8E8E93;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      text-align: center; /* 让“金额”、“类型”等灰色标签也居中 */
     }
+    
     input, select {
       font: inherit;
       font-size: 16px;
@@ -97,37 +93,39 @@
       outline: none;
       transition: box-shadow 0.2s;
       -webkit-appearance: none;
-      text-align: left;
+      text-align: center; /* 核心修改：文字居中 */
     }
     
-    /* ===== 修复 iOS 日期框默认居中的终极魔法 ===== */
+    /* 修复 iOS 日期框文字居中的终极魔法 */
     input[type="date"] {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      text-align: left !important;
+      justify-content: center;
+      text-align: center !important;
       -webkit-appearance: none;
     }
-    /* 专治 Safari 的 Webkit 伪类 */
     input[type="date"]::-webkit-date-and-time-value {
-      text-align: left !important;
+      text-align: center !important;
+      width: 100%; /* 强制撑满让居中生笑 */
     }
     input[type="date"]::-webkit-datetime-edit {
-      text-align: left !important;
+      text-align: center !important;
+      width: 100%;
     }
+    /* 隐藏系统自带的日期小图标，避免破坏居中 */
     input[type="date"]::-webkit-calendar-picker-indicator {
       position: absolute;
       right: 16px;
       height: 100%;
       width: 30px;
-      opacity: 0; /* 隐藏原生的图标，但保留点击区域 */
+      opacity: 0; 
     }
-    /* ========================================= */
 
     input:focus, select:focus {
       box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); 
       background: #FFFFFF;
     }
+    
     .row { display: flex; gap: 10px; }
     .row input { flex: 1; }
     .row select { width: 100px; text-align: center; } 
@@ -238,7 +236,7 @@
     .balance-editor { margin-top: 16px; display: grid; gap: 8px; }
     .balance-editor .editor-row { display: flex; align-items: center; gap: 8px; }
     .balance-editor .editor-row span { flex: 1; font-size: 14px; }
-    .balance-editor input { width: 120px; padding: 10px; text-align: right; }
+    .balance-editor input { width: 120px; padding: 10px; text-align: center; }
   </style>
 </head>
 <body>
