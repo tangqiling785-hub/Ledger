@@ -18,35 +18,48 @@
       transition: background-color 0.4s ease;
     }
     
-    /* 顶部区域 */
+    /* 顶部区域 (左右对称) */
     .topbar {
       position: absolute;
       top: 0; left: 0; width: 100%;
-      padding: 15px 20px;
+      padding: 15px 20px; 
       display: flex; justify-content: space-between; align-items: center;
       pointer-events: none;
       z-index: 100;
     }
     
+    /* 统一顶部按钮样式 */
     .top-btn, .lang-select {
       background: rgba(255, 255, 255, 0.7);
       border: 1px solid rgba(0,0,0,0.05);
       border-radius: 8px;
       color: #007AFF;
       font-size: 14px; font-weight: 600;
-      padding: 0 12px; 
       height: 32px; 
-      line-height: 30px;
       outline: none;
       cursor: pointer;
       backdrop-filter: blur(10px);
       pointer-events: auto;
-      -webkit-appearance: none;
       box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-      white-space: nowrap;
-      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* 左侧备份按钮 */
+    .top-btn {
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .top-btn:active { opacity: 0.7; }
+
+    /* 右侧语言选择器：必须锁定宽度，防止被 iOS 撑开 */
+    .lang-select {
+      width: 60px; /* 固定宽度 */
+      text-align: center;
+      text-align-last: center; /* 强制文字居中 */
+      padding: 0;
+      -webkit-appearance: none;
+    }
 
     /* 主容器 */
     main {
@@ -132,7 +145,7 @@
     .list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; width: 88%; margin: 0 auto;}
     .list li { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #F2F2F7; }
     .list li:last-child { border-bottom: none; padding-bottom: 0; }
-    .list .item-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;}
+    .list .item-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
     .list .meta { color: #8E8E93; font-size: 13px; }
     .list .money { font-size: 17px; font-weight: 700; text-align: right;}
     .list .money.expense { color: #1C1C1E; } 
@@ -181,42 +194,6 @@
       display: block; text-align: center; margin: 30px auto 10px;
       font-size: 13px; color: #8E8E93; text-decoration: underline; cursor: pointer;
     }
-
-    /* ===== 照片上传相关样式 ===== */
-    .photo-upload-row {
-      display: flex; align-items: center; gap: 12px; margin-top: 6px;
-    }
-    .photo-btn {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      background: #F2F2F7; color: #007AFF; border: 1px dashed #007AFF;
-      border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600;
-      cursor: pointer; width: 100%;
-    }
-    .photo-btn input[type="file"] {
-      display: none;
-    }
-    .photo-preview {
-      position: relative; width: 60px; height: 60px; flex-shrink: 0;
-      border-radius: 8px; overflow: hidden; border: 1px solid #E5E5EA;
-    }
-    .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-remove {
-      position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.5); color: #FFF;
-      width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
-      font-size: 12px; border-bottom-left-radius: 8px; cursor: pointer;
-    }
-    .photo-icon { font-size: 14px; }
-
-    /* 图片放大查看层 */
-    .image-viewer {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85); z-index: 999; display: none;
-      align-items: center; justify-content: center; flex-direction: column;
-    }
-    .image-viewer img { max-width: 95%; max-height: 80%; border-radius: 8px; }
-    .image-viewer .close-btn {
-      position: absolute; top: 40px; right: 20px; color: #FFF; font-size: 30px; cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -256,22 +233,9 @@
           <label><span data-i18n="date">日期</span>
             <input type="date" id="date" required>
           </label>
-          
-          <!-- 备注（文字 + 照片） -->
           <label><span data-i18n="note">备注</span>
             <input type="text" id="note" data-i18n-placeholder="notePlaceholder" placeholder="可选">
-            <div class="photo-upload-row">
-              <label class="photo-btn">
-                <span data-i18n="addPhoto">📷 添加照片收据</span>
-                <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoSelect(event)">
-              </label>
-              <div id="photoPreview" class="photo-preview" style="display:none;">
-                <img id="previewImg" src="" alt="预览">
-                <div class="photo-remove" onclick="removePhoto()">✕</div>
-              </div>
-            </div>
           </label>
-
           <button type="submit" class="primary" data-i18n="saveRecord">保存账单</button>
         </form>
       </section>
@@ -392,12 +356,6 @@
     </div>
   </nav>
 
-  <!-- 图片放大查看层 -->
-  <div id="imageViewer" class="image-viewer" onclick="closeViewer()">
-    <div class="close-btn">✕</div>
-    <img id="viewerImg" src="">
-  </div>
-
   <script>
     // ===== 多语言字典 =====
     const LANGS = {
@@ -405,93 +363,44 @@
         overview: '资产概览', hkdAccount: 'HKD 账户', rmbAccount: 'RMB 账户', totalAssets: '总资产', monthExpense: '本月支出',
         record: '记账', transfer: '转账 / 还款', amount: '金额', type: '类型', account: '账户', category: '分类', date: '日期', note: '备注',
         expense: '支出', income: '收入', saveRecord: '保存账单', confirmTransfer: '确认转账', from: '从', to: '到',
-        billList: '账单列表', transferList: '转账记录', noRecords: '还没有记录，先记一笔吧。', noTransfers: '还没有转账记录。', notePlaceholder: '文字备注 (可选)',
+        billList: '账单列表', transferList: '转账记录', noRecords: '还没有记录，先记一笔吧。', noTransfers: '还没有转账记录。', notePlaceholder: '可选',
         tabRecord: '记账', tabAssets: '资产', tabTransfer: '转账',
         manageAccounts: '自定义账户管理', accountNamePlaceholder: '账户名称', none: '无', savings: '存款', fixed: '定期',
         addAccount: '添加账户', adjustBalance: '设置账户初始余额', saveBalance: '保存初始余额',
         backupBtn: '备', importBtn: '找不到数据了？点此恢复', confirmImport: '确认导入并覆盖',
-        addPhoto: '📷 添加照片收据',
         categories: ['餐饮', '交通', '购物', '工资', '利息', '饮料', '其他']
       },
       'zh-TW': {
         overview: '資產概覽', hkdAccount: 'HKD 賬戶', rmbAccount: 'RMB 賬戶', totalAssets: '總資產', monthExpense: '本月支出',
         record: '記賬', transfer: '轉賬 / 還款', amount: '金額', type: '類型', account: '賬戶', category: '分類', date: '日期', note: '備註',
         expense: '支出', income: '收入', saveRecord: '儲存賬單', confirmTransfer: '確認轉賬', from: '從', to: '到',
-        billList: '賬單列表', transferList: '轉賬記錄', noRecords: '還沒有記錄，先記一筆吧。', noTransfers: '還沒有轉賬記錄。', notePlaceholder: '文字備註 (可選)',
+        billList: '賬單列表', transferList: '轉賬記錄', noRecords: '還沒有記錄，先記一筆吧。', noTransfers: '還沒有轉賬記錄。', notePlaceholder: '可選',
         tabRecord: '記賬', tabAssets: '資產', tabTransfer: '轉賬',
         manageAccounts: '自訂賬戶管理', accountNamePlaceholder: '賬戶名稱', none: '無', savings: '存款', fixed: '定期',
         addAccount: '新增賬戶', adjustBalance: '設定賬戶初始餘額', saveBalance: '儲存初始餘額',
         backupBtn: '備', importBtn: '找不到數據了？點此恢復', confirmImport: '確認導入並覆蓋',
-        addPhoto: '📷 添加照片收據',
         categories: ['餐飲', '交通', '購物', '工資', '利息', '飲料', '其他']
       },
       'en': {
         overview: 'Overview', hkdAccount: 'HKD Accounts', rmbAccount: 'RMB Accounts', totalAssets: 'Total Assets', monthExpense: 'Monthly Expense',
         record: 'Record', transfer: 'Transfer / Repay', amount: 'Amount', type: 'Type', account: 'Account', category: 'Category', date: 'Date', note: 'Note',
         expense: 'Expense', income: 'Income', saveRecord: 'Save Record', confirmTransfer: 'Confirm Transfer', from: 'From', to: 'To',
-        billList: 'Records', transferList: 'Transfers', noRecords: 'No records yet.', noTransfers: 'No transfers yet.', notePlaceholder: 'Text Note (Optional)',
+        billList: 'Records', transferList: 'Transfers', noRecords: 'No records yet.', noTransfers: 'No transfers yet.', notePlaceholder: 'Optional',
         tabRecord: 'Record', tabAssets: 'Assets', tabTransfer: 'Transfer',
         manageAccounts: 'Manage Accounts', accountNamePlaceholder: 'Account Name', none: 'None', savings: 'Savings', fixed: 'Fixed',
         addAccount: 'Add Account', adjustBalance: 'Set Initial Balance', saveBalance: 'Save Balance',
         backupBtn: 'Save', importBtn: 'Lost data? Restore here', confirmImport: 'Confirm Import',
-        addPhoto: '📷 Add Receipt Photo',
         categories: ['Dining', 'Transport', 'Shopping', 'Salary', 'Interest', 'Drinks', 'Others']
       }
     };
 
     let currentLang = localStorage.getItem('lang') || 'zh-CN';
-    let currentPhotoData = null; // 暂存当前选中的照片
 
     // 数据读写
     function loadData(key, defaultVal) { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : defaultVal; }
     function saveData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
     let ACCOUNTS = loadData('accounts', []);
-
-    // ===== 照片处理逻辑 =====
-    function handlePhotoSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          // 用 Canvas 压缩图片，防止占用空间过大
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 600; // 缩略图最大宽度
-          const scale = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scale;
-          
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          
-          // 转为压缩后的 base64 字符串 (JPEG, 质量 0.6)
-          currentPhotoData = canvas.toDataURL('image/jpeg', 0.6);
-          
-          document.getElementById('previewImg').src = currentPhotoData;
-          document.getElementById('photoPreview').style.display = 'block';
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function removePhoto() {
-      currentPhotoData = null;
-      document.getElementById('photoInput').value = '';
-      document.getElementById('photoPreview').style.display = 'none';
-      document.getElementById('previewImg').src = '';
-    }
-
-    function viewImage(src) {
-      document.getElementById('viewerImg').src = src;
-      document.getElementById('imageViewer').style.display = 'flex';
-    }
-    function closeViewer() {
-      document.getElementById('imageViewer').style.display = 'none';
-    }
 
     // ===== 渲染函数 =====
     function renderManageAccounts() {
@@ -588,17 +497,9 @@
       sorted.forEach((r) => {
         const li = document.createElement('li');
         const metaName = r.accountName || '未知账户';
-        
-        // 如果有图片，加上照片图标和点击事件
-        let titleHtml = `${r.category}${r.note ? ' · ' + r.note : ''}`;
-        let photoHtml = '';
-        if (r.photo) {
-          photoHtml = `<span class="photo-icon" onclick="event.stopPropagation(); viewImage('${r.photo}')">📷</span>`;
-        }
-
         li.innerHTML = `
           <div>
-            <div class="item-title">${titleHtml} ${photoHtml}</div>
+            <div class="item-title">${r.category}${r.note ? ' · ' + r.note : ''}</div>
             <div class="meta">${r.date} · ${metaName}</div>
           </div>
           <div class="money ${r.type}">${(r.type === 'expense' ? '-' : '+') + r.currency + ' ' + r.amount.toFixed(2)}</div>
@@ -732,7 +633,6 @@
       };
       const str = JSON.stringify(data);
       
-      // 尝试复制到剪贴板
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(str).then(() => {
           alert('✅ 备份已成功复制到剪贴板！\n\n请打开微信“文件传输助手”或备忘录，粘贴并发送保存。');
@@ -831,16 +731,10 @@
         id: Date.now(), amount, currency: document.getElementById('currency').value, 
         type: document.getElementById('type').value, accountId, accountName: account.name, 
         category: document.getElementById('category').value, date: document.getElementById('date').value, 
-        note: document.getElementById('note').value.trim(), 
-        photo: currentPhotoData, // 保存照片数据
-        createdAt: Date.now()
+        note: document.getElementById('note').value.trim(), createdAt: Date.now()
       });
       saveData('records', records);
-      
-      this.reset(); 
-      removePhoto(); // 清空照片预览
-      document.getElementById('date').value = todayStr(); 
-      renderAll();
+      this.reset(); document.getElementById('date').value = todayStr(); renderAll();
     });
 
     document.getElementById('transferForm').addEventListener('submit', function (e) {
