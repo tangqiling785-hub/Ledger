@@ -619,5 +619,24 @@
       setTimeout(() => alert('欢迎！请先点击底部的【资产】页，在下方添加属于你的账户。'), 500);
     }
   </script>
+  <script>
+      // 注册 Service Worker 实现离线可用
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered!'))
+            .catch(err => console.log('SW registration failed:', err));
+        });
+      }
+    </script><script>
+      // 注册 Service Worker 实现离线可用
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered!'))
+            .catch(err => console.log('SW registration failed:', err));
+        });
+      }
+    </script>
 </body>
 </html>
