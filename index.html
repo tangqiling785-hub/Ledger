@@ -52,11 +52,11 @@
     }
     .top-btn:active { opacity: 0.7; }
 
-    /* 右侧语言选择器：必须锁定宽度，防止被 iOS 撑开 */
+    /* 右侧语言选择器 */
     .lang-select {
-      width: 60px; /* 固定宽度 */
+      width: 60px; 
       text-align: center;
-      text-align-last: center; /* 强制文字居中 */
+      text-align-last: center; 
       padding: 0;
       -webkit-appearance: none;
     }
@@ -489,6 +489,7 @@
       });
     }
 
+    // ===== 账单列表 =====
     function renderList() {
       const records = loadData('records', []);
       const listEl = document.getElementById('list'); const emptyTip = document.getElementById('emptyTip');
@@ -497,18 +498,20 @@
       sorted.forEach((r) => {
         const li = document.createElement('li');
         const metaName = r.accountName || '未知账户';
+        // 【修改点】这里把金额拼接的顺序改成了：前缀 + 金额 + 币种
         li.innerHTML = `
           <div>
             <div class="item-title">${r.category}${r.note ? ' · ' + r.note : ''}</div>
             <div class="meta">${r.date} · ${metaName}</div>
           </div>
-          <div class="money ${r.type}">${(r.type === 'expense' ? '-' : '+') + r.currency + ' ' + r.amount.toFixed(2)}</div>
+          <div class="money ${r.type}">${(r.type === 'expense' ? '-' : '+') + r.amount.toFixed(2) + ' ' + r.currency}</div>
         `;
         listEl.appendChild(li);
       });
       emptyTip.style.display = records.length ? 'none' : 'block';
     }
 
+    // ===== 转账列表 =====
     function renderTransfers() {
       const transfers = loadData('transfers', []);
       const listEl = document.getElementById('transferList'); const emptyTip = document.getElementById('transferEmptyTip');
@@ -516,12 +519,13 @@
       const sorted = [...transfers].sort((a, b) => b.createdAt - a.createdAt);
       sorted.forEach((t) => {
         const li = document.createElement('li');
+        // 【修改点】转账记录也统一改为：金额 + 币种
         li.innerHTML = `
           <div>
             <div class="item-title">${t.fromName} → ${t.toName}</div>
             <div class="meta">${t.date}${t.note ? ' · ' + t.note : ''}</div>
           </div>
-          <div class="money transfer">${t.currency} ${t.amount.toFixed(2)}</div>
+          <div class="money transfer">${t.amount.toFixed(2)} ${t.currency}</div>
         `;
         listEl.appendChild(li);
       });
