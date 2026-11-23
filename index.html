@@ -126,6 +126,15 @@
     input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; right: 16px; height: 100%; width: 30px; opacity: 0; }
 
     input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); background: #FFFFFF; }
+
+    /* 币种跟随账户自动锁定时的样式 */
+    select:disabled {
+      opacity: 0.7;
+      background: #E9E9EE;
+      color: #1C1C1E;
+      -webkit-text-fill-color: #1C1C1E;
+      cursor: not-allowed;
+    }
     
     .row { display: flex; gap: 10px; width: 100%; }
     .row input { flex: 1; }
@@ -142,11 +151,13 @@
       background: #FF3B30; color: #FFFFFF; border: none; border-radius: 10px;
       padding: 8px 12px; font-size: 14px; font-weight: 600; cursor: pointer;
     }
+    button.danger:active { opacity: 0.8; }
     button.secondary {
       background: #FFFFFF; color: #007AFF; border: 1px solid #007AFF;
       border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 600;
       cursor: pointer; width: 100%; margin-top: 10px; display: block; text-align: center;
     }
+    button.secondary:active { background: #F0F8FF; }
 
     /* 资产概览区 */
     .split-container { display: flex; gap: 12px; width: 88%; margin: 0 auto; margin-bottom: 20px;}
@@ -169,8 +180,9 @@
     .account-list .acc-bal.negative { color: #FF3B30; }
 
     .list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; width: 88%; margin: 0 auto;}
-    .list li { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #F2F2F7; }
-    .list li:last-child { border-bottom: none; padding-bottom: 0; }
+    .list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 6px 4px; margin: -6px -8px -6px -4px; border-radius: 10px; border-bottom: 1px solid #F2F2F7; cursor: pointer; transition: background 0.15s; }
+    .list li:last-child { border-bottom: none; }
+    .list li:active { background: #F2F2F7; }
     .list .item-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
     .list .meta { color: #8E8E93; font-size: 13px; }
     .list .money { font-size: 17px; font-weight: 700; text-align: right;}
@@ -236,7 +248,7 @@
     <!-- ===== 页面 1：记账 ===== -->
     <section id="page-record" class="page active">
       <section class="card">
-        <h2 data-i18n="record">记账</h2>
+        <h2 id="recordFormTitle" data-i18n="record">记账</h2>
         <form id="recordForm">
           <label><span data-i18n="amount">金额</span>
             <div class="row">
@@ -262,7 +274,9 @@
           <label><span data-i18n="note">备注</span>
             <input type="text" id="note" data-i18n-placeholder="notePlaceholder" placeholder="可选">
           </label>
-          <button type="submit" class="primary" data-i18n="saveRecord">保存账单</button>
+          <button type="submit" class="primary" id="recordSubmitBtn" data-i18n="saveRecord">保存账单</button>
+          <button type="button" class="secondary" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;">取消编辑</button>
+          <button type="button" class="danger" id="deleteEditBtn" onclick="deleteEditingRecord()" style="display:none; width:100%; padding:14px; font-size:15px;">删除这条账单</button>
         </form>
       </section>
 
@@ -399,6 +413,7 @@
         addAccount: '添加账户', adjustBalance: '设置账户初始余额', saveBalance: '保存初始余额',
         backupBtn: '备', importBtn: '找不到数据了？点此恢复', confirmImport: '确认导入并覆盖',
         show: '显示', hide: '隐藏',
+        editBill: '编辑账单', saveEdit: '保存修改', cancelEdit: '取消编辑', deleteBill: '删除这条账单',
         categories: ['餐饮', '交通', '购物', '工资', '利息', '饮料', '其他']
       },
       'zh-TW': {
@@ -411,6 +426,7 @@
         addAccount: '新增賬戶', adjustBalance: '設定賬戶初始餘額', saveBalance: '儲存初始餘額',
         backupBtn: '備', importBtn: '找不到數據了？點此恢復', confirmImport: '確認導入並覆蓋',
         show: '顯示', hide: '隱藏',
+        editBill: '編輯賬單', saveEdit: '儲存修改', cancelEdit: '取消編輯', deleteBill: '刪除這條賬單',
         categories: ['餐飲', '交通', '購物', '工資', '利息', '飲料', '其他']
       },
       'en': {
@@ -423,12 +439,14 @@
         addAccount: 'Add Account', adjustBalance: 'Set Initial Balance', saveBalance: 'Save Balance',
         backupBtn: 'Save', importBtn: 'Lost data? Restore here', confirmImport: 'Confirm Import',
         show: 'Show', hide: 'Hide',
+        editBill: 'Edit Record', saveEdit: 'Save Changes', cancelEdit: 'Cancel', deleteBill: 'Delete This Record',
         categories: ['Dining', 'Transport', 'Shopping', 'Salary', 'Interest', 'Drinks', 'Others']
       }
     };
 
     let currentLang = localStorage.getItem('lang') || 'zh-CN';
     let assetsHidden = localStorage.getItem('assetsHidden') !== 'false';
+    let editingId = null; // 当前正在编辑的账单 id，null 表示新增
 
     // 数据读写
     function loadData(key, defaultVal) { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : defaultVal; }
@@ -485,6 +503,10 @@
         const opt2 = document.createElement('option'); opt2.value = acc.id; opt2.textContent = text; fromSelect.appendChild(opt2);
         const opt3 = document.createElement('option'); opt3.value = acc.id; opt3.textContent = text; toSelect.appendChild(opt3);
       });
+
+      // 初始化币种联动
+      syncRecordCurrency();
+      syncTransferCurrency();
     }
 
     function renderCategoryOptions() {
@@ -540,6 +562,7 @@
           </div>
           <div class="money ${r.type}">${(r.type === 'expense' ? '-' : '+') + r.amount.toFixed(2) + ' ' + r.currency}</div>
         `;
+        li.onclick = () => editRecord(r.id);
         listEl.appendChild(li);
       });
       emptyTip.style.display = records.length ? 'none' : 'block';
@@ -608,6 +631,118 @@
       renderAccounts();
       renderTotalAssets();
       updateEyeBtn();
+    }
+
+    // ===== 币种联动 =====
+    function syncRecordCurrency() {
+      const acc = ACCOUNTS.find(a => a.id === document.getElementById('account').value);
+      const sel = document.getElementById('currency');
+      if (acc) {
+        sel.value = acc.currency;
+        sel.disabled = true; // 账户币种固定，禁止手动改
+      } else {
+        sel.disabled = false;
+      }
+    }
+
+    function filterToAccounts() {
+      const fromId = document.getElementById('fromAccount').value;
+      const fromAcc = ACCOUNTS.find(a => a.id === fromId);
+      const toSel = document.getElementById('toAccount');
+      const prev = toSel.value;
+      toSel.innerHTML = '';
+      ACCOUNTS.forEach(acc => {
+        if (acc.id === fromId) return;
+        if (fromAcc && acc.currency !== fromAcc.currency) return; // 只保留同币种
+        const opt = document.createElement('option');
+        opt.value = acc.id;
+        opt.textContent = `${acc.name}${acc.subType ? ' · ' + acc.subType : ''}（${acc.currency}）`;
+        toSel.appendChild(opt);
+      });
+      // 尽量保留原选择
+      if ([...toSel.options].some(o => o.value === prev)) toSel.value = prev;
+    }
+
+    function syncTransferCurrency() {
+      const fromAcc = ACCOUNTS.find(a => a.id === document.getElementById('fromAccount').value);
+      const sel = document.getElementById('transferCurrency');
+      if (fromAcc) {
+        sel.value = fromAcc.currency;
+        sel.disabled = true;
+      } else {
+        sel.disabled = false;
+      }
+      filterToAccounts();
+    }
+
+    // ===== 账单编辑 =====
+    function updateRecordFormUI() {
+      const L = LANGS[currentLang];
+      const titleEl = document.getElementById('recordFormTitle');
+      const submitEl = document.getElementById('recordSubmitBtn');
+      const cancelEl = document.getElementById('cancelEditBtn');
+      const delEl = document.getElementById('deleteEditBtn');
+      if (editingId) {
+        titleEl.textContent = L.editBill;
+        submitEl.textContent = L.saveEdit;
+        cancelEl.textContent = L.cancelEdit;
+        delEl.textContent = L.deleteBill;
+        cancelEl.style.display = 'block';
+        delEl.style.display = 'block';
+      } else {
+        titleEl.textContent = L.record;
+        submitEl.textContent = L.saveRecord;
+        cancelEl.style.display = 'none';
+        delEl.style.display = 'none';
+      }
+    }
+
+    function editRecord(id) {
+      const records = loadData('records', []);
+      const r = records.find(x => x.id === id);
+      if (!r) return;
+
+      editingId = id;
+
+      // 如果原账户已被删除，补一个临时选项以免填不进去
+      const accountSel = document.getElementById('account');
+      if (!ACCOUNTS.some(a => a.id === r.accountId)) {
+        const opt = document.createElement('option');
+        opt.value = r.accountId;
+        opt.textContent = (r.accountName || '未知账户') + '（已删除）';
+        accountSel.appendChild(opt);
+      }
+      accountSel.value = r.accountId;
+
+      document.getElementById('amount').value = r.amount;
+      document.getElementById('type').value = r.type;
+      document.getElementById('category').value = r.category;
+      document.getElementById('date').value = r.date;
+      document.getElementById('note').value = r.note || '';
+
+      syncRecordCurrency();
+
+      updateRecordFormUI();
+
+      // 滚动到编辑表单
+      document.getElementById('recordFormTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelEdit() {
+      editingId = null;
+      document.getElementById('recordForm').reset();
+      document.getElementById('date').value = todayStr();
+      syncRecordCurrency();
+      updateRecordFormUI();
+    }
+
+    function deleteEditingRecord() {
+      if (!editingId) return;
+      if (!confirm('确定删除这条账单吗？删除后无法恢复。')) return;
+      const records = loadData('records', []).filter(r => r.id !== editingId);
+      saveData('records', records);
+      cancelEdit();
+      renderAll();
     }
 
     // ===== 账户操作 & 初始余额 =====
@@ -750,6 +885,7 @@
       renderCategoryOptions();
       renderAccountOptions();
       renderAll();
+      updateRecordFormUI(); // 恢复编辑态标题与按钮
     }
 
     // ===== 底部导航栏 =====
@@ -767,6 +903,11 @@
     // ===== 事件监听 =====
     document.getElementById('langSelect').addEventListener('change', function(e) { applyLanguage(e.target.value); });
 
+    // 选择账户时自动切换币种
+    document.getElementById('account').addEventListener('change', syncRecordCurrency);
+    // 转账「从」账户变化时同步币种并过滤「到」账户
+    document.getElementById('fromAccount').addEventListener('change', syncTransferCurrency);
+
     document.getElementById('recordForm').addEventListener('submit', function (e) {
       e.preventDefault();
       if (ACCOUNTS.length === 0) { alert('请先在【资产】页底部添加账户'); return; }
@@ -775,17 +916,38 @@
       
       const accountId = document.getElementById('account').value;
       const account = ACCOUNTS.find((a) => a.id === accountId);
-      if (!account) return;
+      if (!account) { alert('请选择一个有效账户'); return; }
 
       const records = loadData('records', []);
-      records.push({
-        id: Date.now(), amount, currency: document.getElementById('currency').value, 
-        type: document.getElementById('type').value, accountId, accountName: account.name, 
-        category: document.getElementById('category').value, date: document.getElementById('date').value, 
-        note: document.getElementById('note').value.trim(), createdAt: Date.now()
-      });
+      const payload = {
+        amount,
+        currency: account.currency, // 始终跟随账户币种
+        type: document.getElementById('type').value,
+        accountId,
+        accountName: account.name,
+        category: document.getElementById('category').value,
+        date: document.getElementById('date').value,
+        note: document.getElementById('note').value.trim()
+      };
+
+      if (editingId) {
+        const idx = records.findIndex(r => r.id === editingId);
+        if (idx >= 0) {
+          records[idx] = { ...records[idx], ...payload, updatedAt: Date.now() };
+          saveData('records', records);
+          cancelEdit();
+          renderAll();
+          alert('✅ 修改已保存');
+          return;
+        }
+      }
+
+      records.push({ id: Date.now(), ...payload, createdAt: Date.now() });
       saveData('records', records);
-      this.reset(); document.getElementById('date').value = todayStr(); renderAll();
+      this.reset();
+      document.getElementById('date').value = todayStr();
+      syncRecordCurrency();
+      renderAll();
     });
 
     document.getElementById('transferForm').addEventListener('submit', function (e) {
@@ -799,17 +961,23 @@
       const fromAcc = ACCOUNTS.find((a) => a.id === from); 
       const toAcc = ACCOUNTS.find((a) => a.id === to);
       
-      if (!fromAcc || !toAcc) return;
+      if (!fromAcc || !toAcc) { alert('请选择有效的转出与转入账户'); return; }
       if (from === to) { alert('不能转给同一个账户'); return; }
       if (fromAcc.currency !== toAcc.currency) { alert('不支持跨币种转账'); return; }
 
       const transfers = loadData('transfers', []);
       transfers.push({
-        id: Date.now(), from, to, fromName: fromAcc.name, toName: toAcc.name, amount, currency: fromAcc.currency,
-        date: document.getElementById('transferDate').value, note: document.getElementById('transferNote').value.trim(), createdAt: Date.now()
+        id: Date.now(), from, to, fromName: fromAcc.name, toName: toAcc.name, amount,
+        currency: fromAcc.currency, // 跟随转出账户币种
+        date: document.getElementById('transferDate').value,
+        note: document.getElementById('transferNote').value.trim(),
+        createdAt: Date.now()
       });
       saveData('transfers', transfers);
-      this.reset(); document.getElementById('transferDate').value = todayStr(); renderAll();
+      this.reset();
+      document.getElementById('transferDate').value = todayStr();
+      renderAccountOptions(); // 重置下拉后重新联动
+      renderAll();
     });
 
     // ===== 启动 =====
