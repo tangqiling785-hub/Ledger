@@ -170,6 +170,34 @@
     .asset-val { font-size: 24px; font-weight: 800; color: #1C1C1E; letter-spacing: -0.5px; }
     .expense-val { font-size: 20px; font-weight: 700; color: #FF3B30; } 
 
+    /* ===== 明细查询 ===== */
+    .query-area { width: 88%; margin: 0 auto; display: grid; gap: 14px; }
+    .query-field { display: grid; gap: 8px; }
+    .query-label { font-size: 13px; font-weight: 600; color: #8E8E93; text-transform: uppercase; letter-spacing: 0.5px; }
+    .quick-range { display: flex; gap: 8px; flex-wrap: wrap; }
+    .range-btn {
+      flex: 1; min-width: 56px; padding: 10px 4px;
+      background: #F2F2F7; border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 600; color: #666; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .range-btn.active { background: #007AFF; color: #FFFFFF; }
+    .range-btn:active { opacity: 0.8; }
+    .custom-range { display: flex; gap: 8px; align-items: center; }
+    .custom-range input { flex: 1; padding: 12px; min-width: 0; }
+    .custom-range span { font-size: 13px; color: #8E8E93; flex-shrink: 0; }
+
+    .query-result { margin-top: 18px; }
+    .query-summary { width: 88%; margin: 0 auto 16px; display: grid; gap: 10px; }
+    .currency-summary { background: #F8F9FA; border-radius: 12px; padding: 12px 14px; }
+    .cs-header { font-size: 14px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px; }
+    .cs-row { display: flex; gap: 14px; font-size: 13px; color: #8E8E93; flex-wrap: wrap; }
+    .cs-row b { font-weight: 700; font-size: 14px; }
+    .cs-row b.income { color: #34C759; }
+    .cs-row b.expense { color: #FF3B30; }
+    .cs-row b.net { color: #1C1C1E; }
+    .cs-row b.net.negative { color: #FF3B30; }
+
     /* 账户/记录列表 */
     .account-list { list-style: none; padding: 0; margin: 16px 0 0 0; display: grid; gap: 1px; border-radius: 12px; overflow: hidden; width: 88%; margin-left: auto; margin-right: auto;}
     .account-list li { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; color: #333; }
@@ -183,6 +211,9 @@
     .list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 6px 4px; margin: -6px -8px -6px -4px; border-radius: 10px; border-bottom: 1px solid #F2F2F7; cursor: pointer; transition: background 0.15s; }
     .list li:last-child { border-bottom: none; }
     .list li:active { background: #F2F2F7; }
+    /* 查询结果的记录为只读，不显示点击反馈 */
+    .list li.no-click { cursor: default; }
+    .list li.no-click:active { background: transparent; }
     .list .item-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
     .list .meta { color: #8E8E93; font-size: 13px; }
     .list .money { font-size: 17px; font-weight: 700; text-align: right;}
@@ -315,6 +346,38 @@
         <ul id="accountList" class="account-list"></ul>
       </section>
 
+      <!-- ===== 明细查询卡片 ===== -->
+      <section class="card">
+        <h2 data-i18n="queryTitle">明细查询</h2>
+        <div class="query-area">
+          <div class="query-field">
+            <div class="query-label" data-i18n="account">账户</div>
+            <select id="queryAccount"></select>
+          </div>
+
+          <div class="query-field">
+            <div class="query-label" data-i18n="timeRange">时间范围</div>
+            <div class="quick-range">
+              <button type="button" class="range-btn active" data-range="thisMonth" onclick="setRange('thisMonth')" data-i18n="thisMonth">本月</button>
+              <button type="button" class="range-btn" data-range="lastMonth" onclick="setRange('lastMonth')" data-i18n="lastMonth">上月</button>
+              <button type="button" class="range-btn" data-range="last30" onclick="setRange('last30')" data-i18n="last30">近30天</button>
+              <button type="button" class="range-btn" data-range="all" onclick="setRange('all')" data-i18n="allTime">全部</button>
+              <button type="button" class="range-btn" data-range="custom" onclick="setRange('custom')" data-i18n="customRange">自定义</button>
+            </div>
+          </div>
+
+          <div id="customRange" class="custom-range" style="display:none;">
+            <input type="date" id="queryStart">
+            <span data-i18n="toLabel">至</span>
+            <input type="date" id="queryEnd">
+          </div>
+
+          <button type="button" class="primary" style="margin-top:0;" onclick="runQuery()" data-i18n="queryBtn">查询</button>
+        </div>
+
+        <div id="queryResult" class="query-result"></div>
+      </section>
+
       <!-- 账户管理卡片 -->
       <section class="card">
         <h2 data-i18n="manageAccounts">自定义账户管理</h2>
@@ -414,6 +477,13 @@
         backupBtn: '备', importBtn: '找不到数据了？点此恢复', confirmImport: '确认导入并覆盖',
         show: '显示', hide: '隐藏',
         editBill: '编辑账单', saveEdit: '保存修改', cancelEdit: '取消编辑', deleteBill: '删除这条账单',
+        // 查询相关
+        queryTitle: '明细查询', timeRange: '时间范围',
+        thisMonth: '本月', lastMonth: '上月', last30: '近30天', allTime: '全部', customRange: '自定义',
+        toLabel: '至', queryBtn: '查询', allAccounts: '全部账户',
+        queryNoResult: '该条件下没有账单记录', queryCount: '笔',
+        queryIncome: '收入', queryExpense: '支出', queryNet: '结余',
+        needRange: '请选择起止日期', invalidRange: '开始日期不能晚于结束日期',
         categories: ['餐饮', '交通', '购物', '工资', '利息', '饮料', '其他']
       },
       'zh-TW': {
@@ -427,6 +497,13 @@
         backupBtn: '備', importBtn: '找不到數據了？點此恢復', confirmImport: '確認導入並覆蓋',
         show: '顯示', hide: '隱藏',
         editBill: '編輯賬單', saveEdit: '儲存修改', cancelEdit: '取消編輯', deleteBill: '刪除這條賬單',
+        // 查詢相關
+        queryTitle: '明細查詢', timeRange: '時間範圍',
+        thisMonth: '本月', lastMonth: '上月', last30: '近30天', allTime: '全部', customRange: '自訂',
+        toLabel: '至', queryBtn: '查詢', allAccounts: '全部賬戶',
+        queryNoResult: '該條件下沒有賬單記錄', queryCount: '筆',
+        queryIncome: '收入', queryExpense: '支出', queryNet: '結餘',
+        needRange: '請選擇起止日期', invalidRange: '開始日期不能晚於結束日期',
         categories: ['餐飲', '交通', '購物', '工資', '利息', '飲料', '其他']
       },
       'en': {
@@ -440,13 +517,21 @@
         backupBtn: 'Save', importBtn: 'Lost data? Restore here', confirmImport: 'Confirm Import',
         show: 'Show', hide: 'Hide',
         editBill: 'Edit Record', saveEdit: 'Save Changes', cancelEdit: 'Cancel', deleteBill: 'Delete This Record',
+        // Query related
+        queryTitle: 'Search', timeRange: 'Time Range',
+        thisMonth: 'This Month', lastMonth: 'Last Month', last30: 'Last 30 Days', allTime: 'All Time', customRange: 'Custom',
+        toLabel: 'to', queryBtn: 'Search', allAccounts: 'All Accounts',
+        queryNoResult: 'No records found.', queryCount: 'items',
+        queryIncome: 'Income', queryExpense: 'Expense', queryNet: 'Net',
+        needRange: 'Please select a date range', invalidRange: 'Start date cannot be later than end date',
         categories: ['Dining', 'Transport', 'Shopping', 'Salary', 'Interest', 'Drinks', 'Others']
       }
     };
 
     let currentLang = localStorage.getItem('lang') || 'zh-CN';
     let assetsHidden = localStorage.getItem('assetsHidden') !== 'false';
-    let editingId = null; // 当前正在编辑的账单 id，null 表示新增
+    let editingId = null;      // 正在编辑的账单 id
+    let currentRange = 'thisMonth'; // 查询时间范围
 
     // 数据读写
     function loadData(key, defaultVal) { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : defaultVal; }
@@ -492,6 +577,7 @@
         const opt = document.createElement('option');
         opt.textContent = '请先在【资产】页底部添加账户';
         accountSelect.appendChild(opt); fromSelect.appendChild(opt); toSelect.appendChild(opt);
+        renderQueryAccountOptions();
         return;
       }
 
@@ -507,6 +593,27 @@
       // 初始化币种联动
       syncRecordCurrency();
       syncTransferCurrency();
+      // 刷新查询账户下拉
+      renderQueryAccountOptions();
+    }
+
+    // 查询账户下拉（含“全部账户”选项，保留当前选中）
+    function renderQueryAccountOptions() {
+      const sel = document.getElementById('queryAccount');
+      if (!sel) return;
+      const prev = sel.value || 'all';
+      sel.innerHTML = '';
+      const allOpt = document.createElement('option');
+      allOpt.value = 'all';
+      allOpt.textContent = LANGS[currentLang].allAccounts;
+      sel.appendChild(allOpt);
+      ACCOUNTS.forEach(acc => {
+        const opt = document.createElement('option');
+        opt.value = acc.id;
+        opt.textContent = `${acc.name}${acc.subType ? ' · ' + acc.subType : ''}（${acc.currency}）`;
+        sel.appendChild(opt);
+      });
+      if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
     }
 
     function renderCategoryOptions() {
@@ -613,11 +720,14 @@
       renderTotalAssets();
       renderManageAccounts();
       updateEyeBtn();
+      refreshQuery(); // 数据变化后同步刷新查询结果
     }
 
     // 工具
     function todayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function isThisMonth(dateStr) { const now = new Date(); return dateStr.startsWith(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`); }
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function fmtDate(d) { return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
 
     // ===== 资产隐藏切换逻辑 =====
     function updateEyeBtn() {
@@ -659,7 +769,6 @@
         opt.textContent = `${acc.name}${acc.subType ? ' · ' + acc.subType : ''}（${acc.currency}）`;
         toSel.appendChild(opt);
       });
-      // 尽量保留原选择
       if ([...toSel.options].some(o => o.value === prev)) toSel.value = prev;
     }
 
@@ -673,6 +782,131 @@
         sel.disabled = false;
       }
       filterToAccounts();
+    }
+
+    // ===== 明细查询 =====
+    function getRangeDates(range) {
+      const now = new Date();
+      const y = now.getFullYear(), m = now.getMonth();
+      if (range === 'thisMonth') {
+        return {
+          start: `${y}-${pad2(m+1)}-01`,
+          end: `${y}-${pad2(m+1)}-${pad2(new Date(y, m+1, 0).getDate())}`
+        };
+      }
+      if (range === 'lastMonth') {
+        const lm = new Date(y, m-1, 1);
+        const ly = lm.getFullYear(), lmm = lm.getMonth();
+        return {
+          start: `${ly}-${pad2(lmm+1)}-01`,
+          end: `${ly}-${pad2(lmm+1)}-${pad2(new Date(ly, lmm+1, 0).getDate())}`
+        };
+      }
+      if (range === 'last30') {
+        const s = new Date(now);
+        s.setDate(s.getDate() - 29);
+        return { start: fmtDate(s), end: fmtDate(now) };
+      }
+      return { start: '', end: '' }; // all
+    }
+
+    function setRange(range) {
+      currentRange = range;
+      document.querySelectorAll('.range-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.range === range);
+      });
+      const customEl = document.getElementById('customRange');
+      if (range === 'custom') {
+        customEl.style.display = 'flex';
+        if (!document.getElementById('queryStart').value) {
+          const r = getRangeDates('thisMonth');
+          document.getElementById('queryStart').value = r.start;
+          document.getElementById('queryEnd').value = r.end;
+        }
+      } else {
+        customEl.style.display = 'none';
+      }
+    }
+
+    function runQuery() {
+      const L = LANGS[currentLang];
+      const container = document.getElementById('queryResult');
+      const accVal = document.getElementById('queryAccount').value || 'all';
+
+      let start = '', end = '';
+      if (currentRange === 'custom') {
+        start = document.getElementById('queryStart').value;
+        end = document.getElementById('queryEnd').value;
+        if (!start || !end) { alert(L.needRange); return; }
+        if (start > end) { alert(L.invalidRange); return; }
+      } else {
+        const r = getRangeDates(currentRange);
+        start = r.start; end = r.end;
+      }
+
+      const records = loadData('records', []);
+      const filtered = records.filter(r => {
+        if (accVal !== 'all' && r.accountId !== accVal) return false;
+        if (start && r.date < start) return false;
+        if (end && r.date > end) return false;
+        return true;
+      }).sort((a, b) => a.date === b.date ? b.createdAt - a.createdAt : (a.date < b.date ? 1 : -1));
+
+      container.dataset.hasResult = '1';
+
+      if (!filtered.length) {
+        container.innerHTML = `<p class="empty">${L.queryNoResult}</p>`;
+        return;
+      }
+
+      // 按币种分别汇总（不同币种不能直接相加）
+      const byCur = {};
+      filtered.forEach(r => {
+        if (!byCur[r.currency]) byCur[r.currency] = { income: 0, expense: 0, count: 0 };
+        byCur[r.currency].count++;
+        if (r.type === 'income') byCur[r.currency].income += r.amount;
+        else byCur[r.currency].expense += r.amount;
+      });
+
+      let summaryHtml = '<div class="query-summary">';
+      Object.keys(byCur).sort().forEach(cur => {
+        const s = byCur[cur];
+        const net = s.income - s.expense;
+        summaryHtml += `
+          <div class="currency-summary">
+            <div class="cs-header">${cur} · ${s.count} ${L.queryCount}</div>
+            <div class="cs-row">
+              <span>${L.queryIncome} <b class="income">+${s.income.toFixed(2)}</b></span>
+              <span>${L.queryExpense} <b class="expense">-${s.expense.toFixed(2)}</b></span>
+              <span>${L.queryNet} <b class="net ${net < 0 ? 'negative' : ''}">${net >= 0 ? '+' : ''}${net.toFixed(2)}</b></span>
+            </div>
+          </div>
+        `;
+      });
+      summaryHtml += '</div>';
+
+      // 明细列表（只读，不可点击编辑）
+      let listHtml = '<ul class="list">';
+      filtered.forEach(r => {
+        listHtml += `
+          <li class="no-click">
+            <div>
+              <div class="item-title">${r.category}${r.note ? ' · ' + r.note : ''}</div>
+              <div class="meta">${r.date} · ${r.accountName || '未知账户'}</div>
+            </div>
+            <div class="money ${r.type}">${(r.type === 'expense' ? '-' : '+') + r.amount.toFixed(2) + ' ' + r.currency}</div>
+          </li>
+        `;
+      });
+      listHtml += '</ul>';
+
+      container.innerHTML = summaryHtml + listHtml;
+    }
+
+    // 数据变化后，如果已经有查询结果则自动刷新
+    function refreshQuery() {
+      const container = document.getElementById('queryResult');
+      if (container && container.dataset.hasResult === '1') runQuery();
     }
 
     // ===== 账单编辑 =====
@@ -721,10 +955,8 @@
       document.getElementById('note').value = r.note || '';
 
       syncRecordCurrency();
-
       updateRecordFormUI();
 
-      // 滚动到编辑表单
       document.getElementById('recordFormTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -883,7 +1115,7 @@
       });
 
       renderCategoryOptions();
-      renderAccountOptions();
+      renderAccountOptions(); // 内部会刷新查询账户下拉
       renderAll();
       updateRecordFormUI(); // 恢复编辑态标题与按钮
     }
@@ -983,7 +1215,9 @@
     // ===== 启动 =====
     document.getElementById('date').value = todayStr();
     document.getElementById('transferDate').value = todayStr();
+    setRange('thisMonth');
     applyLanguage(currentLang);
+    runQuery(); // 初始展示本月全部账户明细
     
     if(ACCOUNTS.length === 0) {
       setTimeout(() => alert('欢迎！请先点击底部的【资产】页，在下方添加属于你的账户。'), 500);
